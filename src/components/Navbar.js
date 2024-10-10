@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaBars, FaHome, FaInfoCircle, FaSignInAlt, FaTag, FaCog } from 'react-icons/fa'; // Importing icons
+import { FaBars, FaHome, FaInfoCircle, FaSignInAlt, FaTag, FaCog, FaMobileAlt } from 'react-icons/fa'; // Importing icons
 
 // Sidebar container with dynamic width
 const SidebarContainer = styled.nav`
@@ -118,6 +118,10 @@ const Navbar = () => {
         <MenuItem>
           <IconContainer isOpen={isOpen}><FaTag style={{ color: 'white' }} /></IconContainer> {/* Features icon */}
           <MenuLink to="/features" isOpen={isOpen}>Features</MenuLink>
+        </MenuItem>
+        <MenuItem>
+          <IconContainer isOpen={isOpen}><FaMobileAlt style={{ color: 'white' }} /></IconContainer>
+          <MenuLink to="/templates" isOpen={isOpen}>Templates</MenuLink>
         </MenuItem>
         <MenuItem>
           <IconContainer isOpen={isOpen}><FaCog style={{ color: 'white' }} /></IconContainer> {/* Pricing icon */}

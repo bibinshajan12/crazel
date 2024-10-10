@@ -7,6 +7,8 @@ import FeaturesPage from './pages/FeaturesPage';
 import PricingPage from './pages/PricingPage';
 import AboutPage from './pages/AboutPage';
 import Sidebar from './components/Navbar';
+import TemplatesPage from './pages/TemplatesPage'; 
+import SigninPage from './pages/SignInPage';
 import './App.css';
 
 function App() {
@@ -37,7 +39,9 @@ function App() {
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/features" element={<FeaturesPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/templates" element={<TemplatesPage />} /> 
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/signin" element={<SigninPage />} />
             </Routes>
           </div>
         </div>

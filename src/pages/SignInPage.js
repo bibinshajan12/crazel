@@ -1,11 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 
-const HomePageContainer = styled.div`
+const SignInContainer = styled.div`
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
@@ -13,63 +11,122 @@ const HomePageContainer = styled.div`
   color: white;
 `;
 
+const SignInBox = styled(motion.div)`
+  background-color: #1f1f1f;
+  padding: 3rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 170, 255, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+`;
+
 const Title = styled(motion.h1)`
-  font-size: 4rem;
-  color: white;
+  font-size: 2.5rem;
+  color: #00aaff;
   margin-bottom: 2rem;
 `;
 
-const TileButton = styled(Link)`
-  padding: 1rem 2rem;
-  background-color: #00aaff;
-  color: white;
-  text-decoration: none;
-  font-size: 1.5rem;
+const Input = styled.input`
+  background-color: #2c2c2c;
+  border: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  font-size: 1rem;
   border-radius: 5px;
-  transition: transform 0.3s ease;
-  &:hover {
-    transform: scale(1.05);
-    background-color: #008fcc;
+  width: 100%;
+  transition: background-color 0.3s ease;
+  &:focus {
+    background-color: #333;
+    outline: none;
   }
 `;
 
-const Footer = styled.footer`
-  position: absolute;
-  bottom: 20px;
-  text-align: center;
+const Button = styled(motion.button)`
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
   width: 100%;
-  color: #999;
+  margin-top: 1.5rem;
+
+  &:hover {
+    background-color: #008fcc;
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
-const HomePage = () => {
+const ToggleButton = styled(motion.span)`
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #00aaff;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const SignInPage = () => {
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  const toggleSignUp = () => {
+    setIsSignUp(!isSignUp);
+  };
+
   return (
-    <HomePageContainer>
-      <Title
-        initial={{ y: -200, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 120 }}
+    <SignInContainer>
+      <SignInBox
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: 'easeInOut' }}
       >
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
+        <Title
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
         >
-          CRAZEL
-        </motion.span>
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
+          {isSignUp ? 'Create Account' : 'Sign In'}
+        </Title>
+        
+        <form>
+          <Input type="email" placeholder="Email" required />
+          <Input type="password" placeholder="Password" required />
+          {isSignUp && (
+            <Input
+              type="password"
+              placeholder="Confirm Password"
+              required
+            />
+          )}
+          <Button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            {isSignUp ? 'Sign Up' : 'Sign In'}
+          </Button>
+        </form>
+
+        <ToggleButton
+          whileHover={{ scale: 1.1 }}
+          onClick={toggleSignUp}
         >
-           
-        </motion.span>
-      </Title>
-      <TileButton to="/chat">Start Building Your App</TileButton>
-      <Footer>
-        <p>&copy; 2024 Crazel - Privacy Policy - Terms of Service</p>
-      </Footer>
-    </HomePageContainer>
+          {isSignUp
+            ? 'Already have an account? Sign In'
+            : "Don't have an account? Sign Up"}
+        </ToggleButton>
+      </SignInBox>
+    </SignInContainer>
   );
 };
 
-export default HomePage;
+export default SignInPage;

@@ -113,8 +113,11 @@
 
 /* Services Section */
 .services-section {
+  text-align: center;
   margin-top: 2rem;
   max-width: 1000px;
+  font-size: 1.5rem;
+  color: #00ff00;
 }
 
 .services-grid {
@@ -123,6 +126,8 @@
   gap: 1.5rem;
   padding: 2rem 0;
 }
+
+
 
 .service-tile {
   background-color: #1f1f1f;
