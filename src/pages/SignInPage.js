@@ -1,79 +1,5 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-
-const SignInContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #141414;
-  color: white;
-`;
-
-const SignInBox = styled(motion.div)`
-  background-color: #1f1f1f;
-  padding: 3rem;
-  border-radius: 15px;
-  box-shadow: 0 8px 30px rgba(0, 170, 255, 0.2);
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
-`;
-
-const Title = styled(motion.h1)`
-  font-size: 2.5rem;
-  color: #00aaff;
-  margin-bottom: 2rem;
-`;
-
-const Input = styled.input`
-  background-color: #2c2c2c;
-  border: none;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.5rem;
-  color: #ffffff;
-  font-size: 1rem;
-  border-radius: 5px;
-  width: 100%;
-  transition: background-color 0.3s ease;
-  &:focus {
-    background-color: #333;
-    outline: none;
-  }
-`;
-
-const Button = styled(motion.button)`
-  background-color: #00aaff;
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  font-size: 1.2rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  width: 100%;
-  margin-top: 1.5rem;
-
-  &:hover {
-    background-color: #008fcc;
-    transform: scale(1.05);
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const ToggleButton = styled(motion.span)`
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #00aaff;
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
+import React, { useState, useEffect } from 'react';
+import './SignInPage.css';
 
 const SignInPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -82,50 +8,73 @@ const SignInPage = () => {
     setIsSignUp(!isSignUp);
   };
 
-  return (
-    <SignInContainer>
-      <SignInBox
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: 'easeInOut' }}
-      >
-        <Title
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          {isSignUp ? 'Create Account' : 'Sign In'}
-        </Title>
-        
-        <form>
-          <Input type="email" placeholder="Email" required />
-          <Input type="password" placeholder="Password" required />
-          {isSignUp && (
-            <Input
-              type="password"
-              placeholder="Confirm Password"
-              required
-            />
-          )}
-          <Button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
-            {isSignUp ? 'Sign Up' : 'Sign In'}
-          </Button>
-        </form>
+  useEffect(() => {
+    // Trigger the Matrix animation
+    initMatrixEffect();
+  }, []);
 
-        <ToggleButton
-          whileHover={{ scale: 1.1 }}
-          onClick={toggleSignUp}
-        >
-          {isSignUp
-            ? 'Already have an account? Sign In'
-            : "Don't have an account? Sign Up"}
-        </ToggleButton>
-      </SignInBox>
-    </SignInContainer>
+  // Matrix Effect function inside the component
+  const initMatrixEffect = () => {
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    // Set the canvas width and height to full screen
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Characters to display (Matrix characters but in blue)
+    const matrixChars = 'CRAZELBIBIN123456789@#$%^&*()*&^%';
+    const fontSize = 16;
+    const columns = canvas.width / fontSize; // Number of columns based on canvas width
+
+    const drops = [];
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1; // Starting point of each column
+    }
+
+    // Function to draw the matrix effect
+    const drawMatrix = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Slightly transparent background for fade effect
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#00aaff'; // Blue text color
+      ctx.font = `${fontSize}px arial`;
+
+      // Loop over the columns and draw the characters
+      for (let i = 0; i < drops.length; i++) {
+        const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        // Randomly reset the drop to create a flowing effect
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    };
+
+    setInterval(drawMatrix, 30); // Draw every 30 milliseconds
+  };
+
+  return (
+    <div className="matrix-background">
+      <div className="sign-in-container">
+        <h1>{isSignUp ? 'Create Account' : 'Sign In'}</h1>
+        <form>
+          <input type="email" placeholder="Email" required />
+          <input type="password" placeholder="Password" required />
+          {isSignUp && (
+            <input type="password" placeholder="Confirm Password" required />
+          )}
+          <button>{isSignUp ? 'Sign Up' : 'Sign In'}</button>
+        </form>
+        <span className="toggle" onClick={toggleSignUp}>
+          {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+        </span>
+      </div>
+      <canvas id="matrix"></canvas> {/* Canvas for matrix background */}
+    </div>
   );
 };
 

@@ -1,0 +1,79 @@
+/* Matrix Background Styles */
+.matrix-background {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: white;
+  }
+  
+  /* Sign-in container styling */
+  .sign-in-container {
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 3rem;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 170, 255, 0.5);
+  }
+  
+  .sign-in-container h1 {
+    font-size: 2.5rem;
+    color: #00aaff;
+    margin-bottom: 2rem;
+  }
+  
+  .sign-in-container input {
+    background-color: #1c1c1c;
+    border: none;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    color: #00aaff;
+    font-size: 1rem;
+    border-radius: 5px;
+    width: 100%;
+  }
+  
+  .sign-in-container button {
+    background-color: #00aaff;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .sign-in-container button:hover {
+    background-color: #008fcc;
+    transform: scale(1.05);
+  }
+  
+  .sign-in-container .toggle {
+    margin-top: 1.5rem;
+    display: block;
+    font-size: 1rem;
+    color: #00aaff;
+    cursor: pointer;
+  }
+  
+  .sign-in-container .toggle:hover {
+    text-decoration: underline;
+  }
+  
+  /* Matrix Effect Canvas */
+  canvas#matrix {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
