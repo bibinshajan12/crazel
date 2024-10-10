@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FaBars, FaHome, FaInfoCircle, FaSignInAlt, FaTag, FaCog } from 'react-icons/fa'; // Importing icons
 
+// Sidebar container with dynamic width
 const SidebarContainer = styled.nav`
   background-color: #141414;
   padding: 2rem 1rem;
@@ -21,17 +22,27 @@ const SidebarContainer = styled.nav`
   overflow: hidden; /* Prevent text overflow */
 `;
 
+// Container for logo and toggle icon to align them on the same line
+const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+`;
+
+// Logo styling, hiding when the sidebar is collapsed
 const Logo = styled(Link)`
   color: #00aaff;
   font-size: 1.8rem;
   font-weight: bold;
   text-decoration: none;
-  margin-bottom: 2rem;
   opacity: ${({ isOpen }) => (isOpen ? '1' : '0')}; /* Hide the logo when collapsed */
   transition: opacity 0.3s ease;
   white-space: nowrap; /* Prevent text wrapping */
 `;
 
+// Menu container
 const Menu = styled.ul`
   list-style: none;
   display: flex;
@@ -40,6 +51,7 @@ const Menu = styled.ul`
   width: 100%;
 `;
 
+// Menu item with icons and links
 const MenuItem = styled.li`
   display: flex;
   align-items: center;
@@ -47,6 +59,7 @@ const MenuItem = styled.li`
   white-space: nowrap; /* Prevent text wrapping */
 `;
 
+// Styling for menu links
 const MenuLink = styled(Link)`
   color: white; /* Set icon and text color to white */
   text-decoration: none;
@@ -65,15 +78,16 @@ const MenuLink = styled(Link)`
   }
 `;
 
+// Icon container to adjust size and alignment
 const IconContainer = styled.div`
   color: white;
-  font-size: 2rem;
+  font-size: ${({ isOpen }) => (isOpen ? '1.5rem' : '2rem')}; /* Adjust icon size based on open state */
   text-align: center;
-  width: 100%;
   cursor: pointer;
   display: flex;
-  justify-content: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')}; /* Align the icon in the center when collapsed */
+  justify-content: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')}; /* Align icon to center when collapsed */
   padding-left: ${({ isOpen }) => (isOpen ? '10px' : '0')}; /* Adjust padding when open or closed */
+  transition: font-size 0.3s ease;
 `;
 
 const Navbar = () => {
@@ -85,12 +99,17 @@ const Navbar = () => {
       onMouseEnter={() => setIsOpen(true)} // Expand when mouse enters
       onMouseLeave={() => setIsOpen(false)} // Collapse when mouse leaves
     >
-      <IconContainer isOpen={isOpen}>
-        <FaBars onClick={() => setIsOpen(!isOpen)} /> {/* Toggle icon for collapsed state */}
-      </IconContainer>
-      <Logo to="/" isOpen={isOpen}>
-        Crazel
-      </Logo>
+      {/* Header container to align toggle icon and logo */}
+      <HeaderContainer>
+        <IconContainer isOpen={isOpen}>
+          <FaBars onClick={() => setIsOpen(!isOpen)} /> {/* Toggle icon */}
+        </IconContainer>
+        <Logo to="/" isOpen={isOpen}>
+          Crazel
+        </Logo>
+      </HeaderContainer>
+
+      {/* Menu items with icons */}
       <Menu>
         <MenuItem>
           <IconContainer isOpen={isOpen}><FaHome style={{ color: 'white' }} /></IconContainer> {/* Home icon */}
