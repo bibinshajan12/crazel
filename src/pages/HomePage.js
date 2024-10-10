@@ -11,26 +11,58 @@ const HomePageContainer = styled.div`
   height: 100vh;
   background-color: #141414;
   color: white;
+  overflow: hidden; /* To prevent scrollbars when animating elements off-screen */
 `;
 
 const Title = styled(motion.h1)`
   font-size: 4rem;
-  color: white;
+  color: #00aaff;
   margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: 3px;
+  line-height: 1.2;
+`;
+
+const SubTitle = styled(motion.h2)`
+  font-size: 2rem;
+  color: #f0f0f0;
+  margin-bottom: 3rem;
+  text-align: center;
+  font-weight: 300;
 `;
 
 const TileButton = styled(Link)`
-  padding: 1rem 2rem;
+  padding: 1rem 2.5rem;
   background-color: #00aaff;
   color: white;
-  text-decoration: none;
   font-size: 1.5rem;
-  border-radius: 5px;
-  transition: transform 0.3s ease;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 8px 15px rgba(0, 170, 255, 0.3);
+  cursor: pointer;
+
   &:hover {
-    transform: scale(1.05);
+    transform: scale(1.1);
     background-color: #008fcc;
+    box-shadow: 0 10px 20px rgba(0, 170, 255, 0.5);
   }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+`;
+
+const GlowingCircle = styled(motion.div)`
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(0, 170, 255, 0.6), transparent);
+  position: absolute;
+  border-radius: 50%;
+  z-index: -1;
 `;
 
 const Footer = styled.footer`
@@ -44,29 +76,47 @@ const Footer = styled.footer`
 const HomePage = () => {
   return (
     <HomePageContainer>
+      {/* Glowing Circle Effects */}
+      <GlowingCircle
+        animate={{
+          x: [0, 50, -50, 0],
+          y: [0, -50, 50, 0],
+          opacity: [0.5, 0.8, 0.5],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          repeatType: 'loop',
+          ease: 'easeInOut',
+        }}
+      />
       <Title
-        initial={{ y: -200, opacity: 0 }}
+        initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 120 }}
       >
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          CRAZEL
-        </motion.span>
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        >
-           
-        </motion.span>
+        CRAZEL
       </Title>
-      <TileButton to="/chat">Start Building Your App</TileButton>
+      <SubTitle
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 1.5 }}
+      >
+        Bringing Your App Ideas to Life
+      </SubTitle>
+      <ButtonContainer>
+        <TileButton to="/chat">Start Building Your App</TileButton>
+        <TileButton to="/features">Explore Features</TileButton>
+      </ButtonContainer>
       <Footer>
-        <p>&copy; 2024 Crazel - Privacy Policy - Terms of Service</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 1 }}
+        >
+          &copy; 2024 Crazel - Privacy Policy - Terms of Service
+        </motion.p>
       </Footer>
     </HomePageContainer>
   );
