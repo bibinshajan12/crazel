@@ -58,15 +58,21 @@ const ChatbotPage = () => {
         if (inputValue.trim() !== '') {
             const newMessage = { text: inputValue, sender: 'user' };
             setMessages([...messages, newMessage]);
-
+    
             if (!initialQuery) {
-                setInitialQuery(inputValue); // Save the first user input as the initial query
+                setInitialQuery(inputValue);
             }
-
+    
             if (isAppRelatedInput(inputValue)) {
                 setInputValue('');
-                // Ask if the user is a beginner or experienced before starting the follow-up questions
+                // Show typing indicator before responding
+                setMessages(prevMessages => [
+                    ...prevMessages,
+                    { text: '...', sender: 'bot', typing: true }
+                ]);
+    
                 setTimeout(() => {
+                    setMessages(prevMessages => prevMessages.filter(msg => !msg.typing));
                     setMessages(prevMessages => [
                         ...prevMessages,
                         { text: 'Are you a beginner or an experienced app builder?', sender: 'bot' }
@@ -75,15 +81,14 @@ const ChatbotPage = () => {
                 }, 1000);
             } else {
                 setInputValue('');
-                setTimeout(() => {
-                    setMessages(prevMessages => [
-                        ...prevMessages,
-                        { text: 'It seems like your message is not related to app creation. Could you provide details about the app you want to build?', sender: 'bot' }
-                    ]);
-                }, 1000);
+                setMessages(prevMessages => [
+                    ...prevMessages,
+                    { text: 'It seems like your message is not related to app creation. Could you provide details about the app you want to build?', sender: 'bot' }
+                ]);
             }
         }
     };
+    
 
     // Handle user selection of beginner or experienced
     const handleUserLevelSelection = (level) => {

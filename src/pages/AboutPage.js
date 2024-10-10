@@ -1,8 +1,9 @@
 import React from 'react';
 import './AboutPage.css';
-import { FaRobot, FaCode, FaEye, FaCloudUploadAlt, FaPalette, FaShieldAlt } from 'react-icons/fa'; // Import icons
+import { FaRobot, FaCode, FaEye, FaCloudUploadAlt, FaPalette, FaShieldAlt, FaHistory, FaLightbulb } from 'react-icons/fa'; // Importing new icons
 import BibinImage from '../assets/images/bibin.jpeg'; // Import Bibin's image
 import VarunImage from '../assets/images/varun.jpeg'; // Import Varun's image
+import AthiraImage from '../assets/images/athira.jpeg'; // Import Varun's image
 
 const AboutPage = () => {
   return (
@@ -11,72 +12,84 @@ const AboutPage = () => {
         <h1>About Us</h1>
       </div>
 
+      {/* Team Section */}
       <div className="team-section">
         <h2>Meet Our Team</h2>
-
-        <div className="team-member">
-        <img src={BibinImage} alt="Bibin Shajan" className="team-photo" /> {/* Bibin's image */}
-          <div className="team-info">
-            <h3>Bibin Shajan, CEO</h3>
-            <p>
-              Bibin Shajan is a visionary leader with a passion for pushing the boundaries of cloud computing and AI.
-              With years of experience as a Cloud Solution Architect and Software Engineering Lead, Bibin has a proven 
-              track record of driving technological innovation and delivering tangible results across diverse industries. 
-              He founded Crazel with the belief that app development should be accessible to everyone, regardless of technical skills.
-            </p>
+        <div className="team-grid">
+          {/* Bibin Card */}
+          <div className="team-card">
+            <img src={BibinImage} alt="Bibin Shajan" className="team-photo" />
+            <div className="team-info">
+              <h3>Bibin Shajan</h3>
+              <h4>CEO</h4>
+              <p>
+                Bibin Shajan is a visionary leader with a passion for pushing the boundaries of cloud computing and AI.
+                With years of experience as a Cloud Solution Architect and Software Engineering Lead, Bibin founded Crazel
+                with the belief that app development should be accessible to everyone.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="team-member">
-          <div className="team-photo-placeholder" /> {/* Placeholder for Varun's image */}
-          <div className="team-info">
-            <h3>Varun, CTO</h3>
-            <p>
-              Varun is a seasoned Software Engineer with a rich background in developing innovative solutions across a variety of industries, 
-              including the fine arts sector. As the Chief Technology Officer of Crazel, Varun brings his deep expertise in full-stack development 
-              to lead the platform's technological vision and strategy. At Crazel, Varun plays a pivotal role in ensuring the seamless integration 
-              of AI-driven features, enhancing the no-code platform’s ability to help users create and deploy mobile apps with ease.
-            </p>
+          {/* Varun Card */}
+          <div className="team-card">
+            <img src={VarunImage} alt="Varun" className="team-photo" />
+            <div className="team-info">
+              <h3>Varun</h3>
+              <h4>CTO</h4>
+              <p>
+                Varun is a seasoned Software Engineer with a rich background in developing innovative solutions.
+                As the CTO of Crazel, Varun leads the platform's technological vision, ensuring seamless integration of AI-driven features.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="team-member">
-          <div className="team-photo-placeholder" /> {/* Placeholder for Athira's image */}
-          <div className="team-info">
-            <h3>Athira, CFO</h3>
-            <p>
-              Athira, a senior Business Analyst and a Masters holder in data science, has over 10 years of experience in the IT industry. 
-              Her expertise spans data science, finance, and business strategy. At Crazel, Athira oversees financial strategy, helping 
-              to ensure the company's continued growth and success.
-            </p>
+          {/* Athira Card */}
+          <div className="team-card">
+            <img src={AthiraImage} alt="Athira" className="team-photo" />
+            <div className="team-info">
+              <h3>Athira</h3>
+              <h4>CFO</h4>
+              <p>
+                Athira, a senior Business Analyst and a Masters holder in data science, has over 10 years of experience in the IT industry.
+                At Crazel, she oversees financial strategy, ensuring the company’s continued growth and success.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* History Section */}
       <div className="history-section">
         <h2>Our History</h2>
         <div className="history-content">
-          <p>
-            Our journey began with a simple yet powerful idea: to make app development accessible to everyone, regardless of their technical skills. 
+          <div className="history-card">
+          <FaHistory className="history-icon" /> {/* History Icon */}
+          <div className="history-info">
+              <h3>The Story Behind Crazel</h3>
+              <p>Our journey began with a simple yet powerful idea: to make app development accessible to everyone, regardless of their technical skills. 
             As tech enthusiasts, we witnessed countless entrepreneurs, small business owners, and creators face roadblocks in turning their app ideas 
             into reality due to the complexity and high cost of development. This inspired the creation of Crazel, a platform designed to empower anyone 
             to build, customize, and deploy mobile apps effortlessly. Our vision was clear from the start—to remove the technical barriers and provide a tool 
-            that transforms creativity into functional mobile applications without the need for coding expertise.
-          </p>
-          <div className="history-image-placeholder" /> {/* Placeholder for an image */}
+            that transforms creativity into functional mobile applications without the need for coding expertise.</p>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Approach Section */}
       <div className="approach-section">
         <h2>Our Approach</h2>
         <div className="approach-content">
-          <p>
-            At Crazel, we believe that app development should be as easy as having a conversation. This led us to integrate AI into our platform, 
+          <div className="approach-card">
+          <FaLightbulb className="approach-icon" /> {/* Approach Icon */}
+          <div className="approach-info">
+              <h3>A Conversation-Led App Development</h3>
+              <p>At Crazel, we believe that app development should be as easy as having a conversation. This led us to integrate AI into our platform, 
             creating a chatbot that intelligently guides users through the entire app-building process. Users simply describe their app idea, 
             and the AI-powered chatbot handles the rest—asking questions, offering suggestions, and translating the conversation into fully 
-            functional app components.
-          </p>
-          <div className="approach-image-placeholder" /> {/* Placeholder for an image */}
+            functional app components.</p>
+            </div>
+          </div>
         </div>
       </div>
 
