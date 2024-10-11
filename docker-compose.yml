@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: ./crazel_frontend
+      dockerfile: Dockerfile  # Specifies the custom Dockerfile in the frontend folder
+    ports:
+      - "80:80"  # Serve the React app on port 80
+    networks:
+      - webnet
+    depends_on:
+      - backend  # Make sure the backend service is up before starting the frontend
+
+  backend:
+    build:
+      context: ./crazel_backend
+      dockerfile: Dockerfile  # Django Dockerfile is in the backend folder
+    ports:
+      - "8000:8000"  # Expose Django API on port 8000
+    networks:
+      - webnet
+    volumes:
+      - ./backend:/app
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost  # Adjust as per your needs
+      - DATABASE_URL=sqlite:///db.sqlite3  # Change for PostgreSQL or other DBs
+    command: python manage.py runserver 0.0.0.0:8000  # Run Django server
+
+networks:
+  webnet:
