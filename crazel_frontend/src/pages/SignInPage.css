@@ -1,0 +1,85 @@
+/* Particle Background */
+.sign-in-page {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Sign In Form Container */
+.sign-in-container {
+  position: relative;
+  z-index: 10; /* Make sure it stays on top of particles */
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 3rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 170, 255, 0.5);
+}
+
+.sign-in-container h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #00aaff;
+}
+
+.sign-in-container input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #00aaff;
+  background-color: #1c1c1c;
+  color: #f0f0f0;
+  font-size: 1rem;
+}
+
+.sign-in-container button {
+  padding: 0.75rem 2rem;
+  border-radius: 5px;
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sign-in-container button:hover {
+  background-color: #008fcc;
+}
+
+.try-for-free-button {
+  margin-top: 2rem;
+  padding: 1rem 3rem;
+  border-radius: 50px;
+  background-color: #00ff00;
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.try-for-free-button:hover {
+  background-color: #00cc00;
+  transform: translateY(-3px); /* Add a small lift effect */
+}
+
+.toggle {
+  display: block;
+  margin-top: 1.5rem;
+  color: #f0f0f0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1; /* Ensures the canvas is behind the form */
+}

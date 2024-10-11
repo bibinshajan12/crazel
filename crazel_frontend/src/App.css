@@ -1,0 +1,187 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Layout */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-content {
+  display: flex;
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar collapse */
+}
+
+.page-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  padding-top: 80px; /* Adjust for fixed navbar height */
+}
+
+/* Navbar (assuming fixed) */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px; /* Adjust the height of your navbar */
+  background-color: #141414;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar (dynamically adjust its width) */
+.sidebar {
+  position: fixed;
+  top: 80px; /* Place right below the navbar */
+  left: 0;
+  height: 100%;
+  background-color: #1f1f1f;
+  transition: width 0.3s ease;
+  z-index: 999;
+}
+
+/* Full collapse when closed */
+.sidebar-collapsed {
+  width: 0; /* Fully collapse the sidebar */
+}
+
+.sidebar-expanded {
+  width: 250px; /* Width when expanded */
+}
+
+/* Sidebar content (adjust icon size, etc.) */
+.sidebar .icon {
+  font-size: 1.5rem;
+  color: white;
+  margin-left: 20px; /* Adjust margin for better spacing */
+}
+
+.sidebar-collapsed .icon {
+  font-size: 2rem;
+  margin-left: 0; /* Center the icon when the sidebar is collapsed */
+}
+/* Ensure no white areas in the entire app */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #141414; /* Dark background color */
+  color: #f0f0f0; /* Light text for contrast */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Main app layout */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #141414; /* Same dark color as navbar and content */
+}
+
+/* Navbar styling */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  background-color: #141414; /* Ensure navbar matches the dark theme */
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Main content area (adjusts based on the sidebar state) */
+.main-content {
+  display: flex;
+  flex: 1;
+  background-color: #141414; /* Consistent dark background */
+  transition: margin-left 0.3s ease; /* Smooth transition when sidebar collapses/expands */
+}
+
+/* Page content */
+.page-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  padding-top: 80px; /* Adjust for the height of the fixed navbar */
+  background-color: #141414; /* Dark background to match the layout */
+}
+
+/* Sidebar styling */
+.sidebar {
+  position: fixed;
+  top: 80px; /* Below the navbar */
+  left: 0;
+  height: 100%;
+  background-color: #1f1f1f; /* Slightly lighter than main content for contrast */
+  transition: width 0.3s ease;
+  z-index: 999;
+}
+
+/* Sidebar collapsed and expanded states */
+.sidebar-collapsed {
+  width: 80px; /* Width when sidebar is collapsed */
+}
+
+.sidebar-expanded {
+  width: 250px; /* Width when sidebar is expanded */
+}
+
+/* Styling for icons in the sidebar */
+.sidebar .icon {
+  font-size: 1.5rem;
+  color: white;
+  margin-left: 20px;
+}
+
+.sidebar-collapsed .icon {
+  font-size: 2rem;
+  margin-left: 0;
+}
+
+/* No white space on mobile devices or larger screens */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+}
