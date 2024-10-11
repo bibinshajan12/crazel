@@ -94,6 +94,8 @@
     background-color: #d32f2f; /* Darker red on hover */
 }
 
+
+
 /* Ensure content fits */
 /* Ensure content fits */
 .chatbot-container, .chatbot-messages, .chatbot-input-container {
@@ -269,6 +271,26 @@
     background-position: right 1rem center;
     background-size: 12px 8px;
 }
+
+.follow-up-text {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 10px; /* Padding between the question and input */
+    margin-bottom: 15px; /* Space below the input */
+    box-sizing: border-box; /* Ensures padding does not affect total width */
+    resize: none; /* Disable manual resizing */
+    overflow-y: auto; /* Add vertical scroll bar when needed */
+    max-height: 200px; /* Maximum height for the text box */
+    min-height: 40px; /* Minimum height to display a few lines of text */
+    line-height: 1.5; /* Adjust line height for better readability */
+    word-wrap: break-word; /* Ensure long words break properly */
+    transition: height 0.2s ease; /* Smooth height adjustment */
+}
+
+
 
 /* Navigation buttons */
 .navigation-buttons {
@@ -537,10 +559,16 @@
     max-width: 80%;
 }
 
+
 .message.user {
     align-self: flex-end;
     background-color: #e0f7fa;
     color: #00796b;
+    align-self: flex-end;
+    display: inline-block; /* Allows the message box to only take as much space as necessary */
+    max-width: 80%; /* Limit the message width so it doesn't span the entire container */
+    word-wrap: break-word; /* Break words that are too long */
+    white-space: pre-wrap; /* Preserve spaces and line breaks */
 }
 
 .message.bot {

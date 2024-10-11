@@ -106,7 +106,14 @@ const ChatbotPage = () => {
         setMessages(prevMessages => [
             ...prevMessages,
             { text: `You selected: ${level}`, sender: 'user' }
+            
         ]);
+        if (level === 'experienced') {
+            setMessages(prevMessages => [
+                ...prevMessages,
+                { text: 'Please provide more details about your experience.', sender: 'bot' }
+            ]);
+        }
         setShowUserLevelModal(false); // Close the modal
         setTimeout(() => {
             setMessages(prevMessages => [
@@ -144,6 +151,11 @@ const ChatbotPage = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
+    };
+    
+    const handleTextInputResize = (e) => {
+        e.target.style.height = "auto"; // Reset the height first
+        e.target.style.height = `${e.target.scrollHeight}px`; // Set the height based on the scroll height
     };
 
     const handleClearChat = () => {
@@ -227,7 +239,17 @@ const ChatbotPage = () => {
                             </option>
                         ))}
                     </select>
-                ) : null}
+                ) : (
+                    <textarea
+                        className="follow-up-text"
+                        value={savedAnswer}
+                        onChange={(e) => {
+                            handleFollowUpAnswerChange(currentQuestion.id, e.target.value);
+                            handleTextInputResize(e); // Adjust the height as the user types
+                        }}
+                        placeholder="Type your response..."
+                    />
+                )}
                 <div className="navigation-buttons">
                     <button className="prev-button" onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>Previous</button>
                     {currentQuestionIndex === filteredQuestions.length - 1 ? (
