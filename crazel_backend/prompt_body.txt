@@ -1,0 +1,78 @@
+Based on the above user inputs, please generate all the Flutter code in a single `main.dart` file . The `main.dart` file should include all essential components like routing, screens, widgets, models, services, constants, themes, and state management.
+
+The following sections should be merged into the `main.dart` file. The generated content should be well-structured, cleanly organized, and follow Flutter best practices. Ensure proper separation of concerns within the file using comments to delineate sections.
+
+**Important**: Please provide no preamble, no explanations, and no additional text other than the content for `main.dart`.
+
+### The `main.dart` file should include:
+
+---
+
+1. **Imports**:  
+Include all required imports at the top of the `main.dart` file. This should cover core Flutter imports as well as any required packages (e.g., provider, Firebase, etc.).
+
+---
+
+2. **App Setup**:  
+Define the main entry point (`void main()` function) and the app's root widget (`MaterialApp` or `CupertinoApp`). Include theming, initial routes, and localization if necessary.
+
+---
+
+3. **Screens**:  
+Implement all essential screens inside the `main.dart` file.  
+- `HomeScreen`: A widget representing the home screen.
+- `LoginScreen`: If user authentication is required, implement a login/signup screen.
+- Additional screens such as ProfileScreen and SettingsScreen, depending on the user's input.
+
+---
+
+4. **Widgets**:  
+Create reusable custom widgets such as buttons, forms, or navigation bars. Each widget should be implemented as a separate class inside the `main.dart` file.
+
+---
+
+5. **Models**:  
+Define data models (e.g., `User`, `Product`) as classes within the `main.dart` file. Include JSON serialization if necessary.
+
+---
+
+6. **Services**:  
+Implement service classes to handle external API calls, user authentication, and database interactions.
+
+---
+
+7. **Routes**:  
+Include a centralized routing system. Implement a route generator or routing map to navigate between screens.
+
+---
+
+8. **Constants**:  
+Define global constants like colors, text styles, padding values, and string literals at the top of the `main.dart` file. Centralize all constants to ensure consistent design.
+
+---
+
+9. **State Management**:  
+Implement state management using a solution like `provider` or `bloc`. Integrate state management logic directly into the `main.dart` file, ensuring the app's state flows properly across screens and widgets.
+
+---
+
+10. **Themes**:  
+Define light and dark themes inside the `main.dart` file. Use `ThemeData` to manage the app’s color schemes, typography, and design elements.
+
+---
+
+
+
+### Output Format (No Preamble):
+
+Please return only the following content in this exact format:
+
+---
+
+**`main.dart`**:  
+*consolidated content for all sections including screens, widgets, models, services, constants, routes, state management, and themes*
+
+
+---
+
+**Note**: Please ensure that there is no preamble, no additional explanations, the response should start with just import statement and no extra content outside the specified `main.dart` file.

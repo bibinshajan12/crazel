@@ -15,6 +15,12 @@ const ChatbotPage = () => {
     const [showUserLevelModal, setShowUserLevelModal] = useState(false); // Control showing the modal
     const [filteredQuestions, setFilteredQuestions] = useState([]); // Filtered questions for beginners
     const [finalized, setFinalized] = useState(false); // To track if the questions are finalized
+    const [showInitialPopup, setShowInitialPopup] = useState(true); // Show initial popup
+    const [appName, setAppName] = useState(''); // Store the name of the app
+    const [showAppNamePrompt, setShowAppNamePrompt] = useState(false); // Control showing the app name prompt
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [showRetryPopup, setShowRetryPopup] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); 
 
     // Load chat data from localStorage when the component is mounted
     useEffect(() => {
@@ -54,31 +60,36 @@ const ChatbotPage = () => {
         return appKeywords.some(keyword => message.toLowerCase().includes(keyword));
     };
 
+    // Handle OK button in the initial popup
+    const handleOkClick = () => {
+        setShowInitialPopup(false);
+        setShowAppNamePrompt(true); // Show the app name prompt
+    };
+
+    // Handle app name submission
+    const handleAppNameSubmit = () => {
+        if (appName.trim()) {
+            setShowAppNamePrompt(false);
+            setMessages([...messages, { text: `App Name: ${appName}`, sender: 'user' }]);
+        }
+    };
+
     const handleSend = () => {
         if (inputValue.trim() !== '') {
             const newMessage = { text: inputValue, sender: 'user' };
             setMessages([...messages, newMessage]);
-    
+
             if (!initialQuery) {
                 setInitialQuery(inputValue);
             }
-    
+
             if (isAppRelatedInput(inputValue)) {
                 setInputValue('');
-                // Show typing indicator before responding
                 setMessages(prevMessages => [
                     ...prevMessages,
-                    { text: '...', sender: 'bot', typing: true }
+                    { text: 'Are you a beginner or an experienced app builder?', sender: 'bot' }
                 ]);
-    
-                setTimeout(() => {
-                    setMessages(prevMessages => prevMessages.filter(msg => !msg.typing));
-                    setMessages(prevMessages => [
-                        ...prevMessages,
-                        { text: 'Are you a beginner or an experienced app builder?', sender: 'bot' }
-                    ]);
-                    setShowUserLevelModal(true); // Show the pop-up window modal
-                }, 1000);
+                setShowUserLevelModal(true); // Show the pop-up window modal
             } else {
                 setInputValue('');
                 setMessages(prevMessages => [
@@ -88,7 +99,6 @@ const ChatbotPage = () => {
             }
         }
     };
-    
 
     // Handle user selection of beginner or experienced
     const handleUserLevelSelection = (level) => {
@@ -106,7 +116,6 @@ const ChatbotPage = () => {
         setMessages(prevMessages => [
             ...prevMessages,
             { text: `You selected: ${level}`, sender: 'user' }
-            
         ]);
         if (level === 'experienced') {
             setMessages(prevMessages => [
@@ -152,11 +161,6 @@ const ChatbotPage = () => {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
     };
-    
-    const handleTextInputResize = (e) => {
-        e.target.style.height = "auto"; // Reset the height first
-        e.target.style.height = `${e.target.scrollHeight}px`; // Set the height based on the scroll height
-    };
 
     const handleClearChat = () => {
         // Reset all states to clear the chat
@@ -175,6 +179,13 @@ const ChatbotPage = () => {
         localStorage.clear();
     };
 
+    const LoadingWidget = () => (
+        <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Building your app, please wait...</p>
+        </div>
+    );
+
     const finalizeQuestions = () => {
         // Display the last question and answer in the chatbot
         const currentQuestion = filteredQuestions[currentQuestionIndex];
@@ -188,24 +199,36 @@ const ChatbotPage = () => {
     };
 
     const handleFinalizeAndBuild = async () => {
-        // Send chat history to the backend to build the prompt
+        // Disable buttons after submission
+        setFinalized(true);
+
+        // Send chat history along with app name to the backend to build the prompt
         const chatHistory = [...messages, ...filteredQuestions.map(q => ({
             question: q.question,
             answer: followUpAnswers[q.id]
         }))];
 
         try {
-            await axios.post('/api/chatbot/build/', { chatHistory });  // Note the trailing slash
+            const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });  // Note the trailing slash
 
-            setMessages(prevMessages => [
-                ...prevMessages,
-                { text: 'We have sent your app idea to the backend to start building!', sender: 'bot' }
-            ]);
+            if (response.status === 200) {
+                // Show success modal
+                setMessages(prevMessages => [
+                    ...prevMessages,
+                    { text: 'Success! Your app is now ready for review.', sender: 'bot' }
+                ]);
+                setShowSuccessPopup(true); // Show the success popup for real-time app preview
+            } else {
+                throw new Error("Backend failure");
+            }
         } catch (error) {
             setMessages(prevMessages => [
                 ...prevMessages,
                 { text: 'There was an error sending your app idea to the backend.', sender: 'bot' }
             ]);
+            setShowRetryPopup(true); // Show retry option if failed
+        } finally {
+            setIsLoading(false); // Stop loading after response
         }
     };
 
@@ -246,7 +269,6 @@ const ChatbotPage = () => {
                         value={savedAnswer}
                         onChange={(e) => {
                             handleFollowUpAnswerChange(currentQuestion.id, e.target.value);
-                            handleTextInputResize(e); // Adjust the height as the user types
                         }}
                         placeholder="Type your response..."
                     />
@@ -265,9 +287,36 @@ const ChatbotPage = () => {
 
     return (
         <div className="chatbot-container">
+            {/* Initial Popup */}
+            {showInitialPopup && (
+                <div className="initial-popup">
+                    <div className="popup-content">
+                        <p>Welcome! Ready to create an app with Crazel?</p>
+                        <button onClick={handleOkClick}>OK</button>
+                    </div>
+                </div>
+            )}
+
+            {/* App Name Prompt */}
+            {showAppNamePrompt && (
+                <div className="app-name-prompt">
+                    <div className="prompt-content">
+                        <h3>What would you like to name your app?</h3>
+                        <input
+                            type="text"
+                            value={appName}
+                            onChange={(e) => setAppName(e.target.value)}
+                            placeholder="Enter app name..."
+                        />
+                        <button onClick={handleAppNameSubmit}>Submit</button>
+                    </div>
+                </div>
+            )}
+
             <div className="chatbot-header">
-                <h2>Lets give Wings to your Idea</h2>
+                <h2>Let's give wings to your idea</h2>
             </div>
+
             <div className="chatbot-messages">
                 {messages.map((msg, index) => (
                     <div key={index} className={`message ${msg.sender}`}>
@@ -276,12 +325,20 @@ const ChatbotPage = () => {
                 ))}
             </div>
 
-            {/* Replace the input with Finalize/Retake buttons once finished */}
+            {/* Render Finalize/Retake buttons or input based on finalized state */}
             {finalized ? (
-                <div className="finalize-buttons">
-                    <button className="finalize-button" onClick={handleFinalizeAndBuild}>Finalize and Build</button>
-                    <button className="retake-button" onClick={handleRetake}>Retake</button>
-                </div>
+                isLoading ? (
+                    <LoadingWidget /> // Show loading spinner
+                ) : (
+                    <div className="finalize-buttons">
+                        <button className="finalize-button" onClick={handleFinalizeAndBuild} disabled={finalized}>
+                            Finalize and Build
+                        </button>
+                        <button className="retake-button" onClick={handleRetake} disabled={finalized}>
+                            Retake
+                        </button>
+                    </div>
+                )
             ) : (
                 <div className="chatbot-input-container">
                     <input
@@ -293,7 +350,7 @@ const ChatbotPage = () => {
                         placeholder="Type your message..."
                     />
                     <button className="send-button" onClick={handleSend}>Send</button>
-                    <button className="clear-button" onClick={handleClearChat}>Clear</button> {/* Add the Clear button */}
+                    <button className="clear-button" onClick={handleClearChat}>Clear</button>
                 </div>
             )}
 
@@ -331,6 +388,28 @@ const ChatbotPage = () => {
             {isSubmitted && (
                 <div className="final-message">
                     We are building your mobile app...
+                </div>
+            )}
+
+            {/* Success Popup */}
+            {showSuccessPopup && (
+                <div className="success-popup">
+                    <div className="popup-content">
+                        <p>Success! Your app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
+                        <button onClick={() => window.location.href = '/app-preview'}>View</button> 
+                        <button onClick={() => setShowSuccessPopup(false)}>Close</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Retry Popup */}
+            {showRetryPopup && (
+                <div className="retry-popup">
+                    <div className="popup-content">
+                        <p>There was a failure on the backend. Do you want to retry?</p>
+                        <button onClick={handleFinalizeAndBuild}>Retry</button>
+                        <button onClick={() => setShowRetryPopup(false)}>Cancel</button>
+                    </div>
                 </div>
             )}
         </div>

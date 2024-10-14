@@ -27,5 +27,16 @@ services:
       - DATABASE_URL=sqlite:///db.sqlite3  # Change for PostgreSQL or other DBs
     command: python manage.py runserver 0.0.0.0:8000  # Run Django server
 
+  flutter_web:
+    build:
+      context: ./crazel_flutter
+      dockerfile: Dockerfile  # Specifies the Dockerfile for the Flutter web app
+    ports:
+      - "8080:80"  # Serve Flutter web app on port 8080 (mapped to port 80 inside container)
+    networks:
+      - webnet
+    depends_on:
+      - backend  # Flutter app depends on the backend to retrieve data
+
 networks:
   webnet:

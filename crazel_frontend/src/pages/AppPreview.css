@@ -1,0 +1,89 @@
+/* App Preview Page Container */
+.app-preview-container {
+    background-color: #f4f4f9;
+    color: #333;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Header Styles */
+.app-preview-header {
+    background-color: #00aaff;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.app-preview-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.app-preview-header p {
+    margin: 10px 0 0;
+    font-size: 1.2rem;
+}
+
+/* Preview Section */
+.app-preview-section {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.app-preview-iframe {
+    width: 100%;
+    height: 600px;
+    border: 2px solid #00aaff;
+    border-radius: 10px;
+    max-width: 900px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* App Information Section */
+.app-info-section {
+    background-color: white;
+    padding: 20px;
+    margin-top: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.app-info-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #00aaff;
+}
+
+.app-info-section p {
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+
+/* Action Buttons */
+.app-preview-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.preview-btn {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    background-color: #00aaff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.preview-btn:hover {
+    background-color: #008fcc;
+}
