@@ -195,7 +195,8 @@ const ChatbotPage = () => {
         }))];
 
         try {
-            await axios.post('/api/build', { chatHistory });
+            await axios.post('/api/chatbot/build/', { chatHistory });  // Note the trailing slash
+
             setMessages(prevMessages => [
                 ...prevMessages,
                 { text: 'We have sent your app idea to the backend to start building!', sender: 'bot' }
