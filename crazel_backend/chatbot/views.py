@@ -11,6 +11,7 @@ import logging
 from dotenv import load_dotenv
 import openai
 import re
+from django.http import HttpResponse
 
 
 # Set up logging
@@ -72,9 +73,9 @@ class BuildAppAPIView(APIView):
 
             # Generate the Flutter app code using Azure OpenAI
             app_files = None
-            app_files = self.call_azure_openapi(messages)
-            print(f'the response received from openai is {app_files}')
-            create_flutter_files(app_files, appname)
+            # app_files = self.call_azure_openapi(messages)
+            # print(f'the response received from openai is {app_files}')
+            # create_flutter_files(app_files, appname)
             
 
             print('App has been generated successfully.')
@@ -167,21 +168,20 @@ def generate_pubspec_yaml(appname):
             if match:
                 dependencies.add(match.group(1))
 
-    # Default dependencies
-    dependencies_list = ['flutter']
-    dependencies_list.extend(dependencies)
+    # Ensure 'flutter' dependency is present without duplicates
+    dependencies.add('flutter')
 
     # Create pubspec.yaml content dynamically
-    pubspec_header = """
-name: {}
+    pubspec_header = f"""
+name: {appname}
 description: A new Flutter project.
 version: 1.0.0+1
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
-""".format(appname)
-    pubspec_dependencies = generate_dependencies_content(dependencies_list)
+"""
+    pubspec_dependencies = generate_dependencies_content(dependencies)
     pubspec_footer = """
 dev_dependencies:
   flutter_test:
@@ -210,17 +210,18 @@ flutter:
         file.write(pubspec_content)
     print(f"pubspec.yaml file created at {pubspec_path}")
 
-def generate_dependencies_content(dependencies_list):
+def generate_dependencies_content(dependencies):
     pubspec_dependencies = ""
-    for dependency in dependencies_list:
+    for dependency in dependencies:
         if dependency == 'flutter':
             pubspec_dependencies += "  flutter:\n    sdk: flutter\n"
         else:
-            pubspec_dependencies += "  {}: any\n".format(dependency)
+            pubspec_dependencies += f"  {dependency}: any\n"
     return pubspec_dependencies
 
 def merge_pubspec_content(header, dependencies, footer):
-    return "{}{}{}".format(header, dependencies, footer)
+    return f"{header}{dependencies}{footer}"
+
 
 def validate_dart_file(file_path):
     # Read the file content
@@ -235,3 +236,22 @@ def validate_dart_file(file_path):
         file.write(cleaned_content)
     print(f"main.dart file validated and cleaned at {file_path}")
 
+
+
+def get_main_dart(request, appname):
+    file_path = f'generate_apps/{appname}/lib/main.dart'
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            content = file.read()
+        return HttpResponse(content, content_type="text/plain")
+    else:
+        return HttpResponse("main.dart not found", status=404)
+
+def get_pubspec_yaml(request, appname):
+    file_path = f'generate_apps/{appname}/pubspec.yaml'
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            content = file.read()
+        return HttpResponse(content, content_type="text/plain")
+    else:
+        return HttpResponse("pubspec.yaml not found", status=404)

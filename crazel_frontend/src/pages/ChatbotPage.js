@@ -199,38 +199,41 @@ const ChatbotPage = () => {
     };
 
     const handleFinalizeAndBuild = async () => {
-        // Disable buttons after submission
-        setFinalized(true);
-
+        setIsLoading(true);
+    
         // Send chat history along with app name to the backend to build the prompt
         const chatHistory = [...messages, ...filteredQuestions.map(q => ({
             question: q.question,
             answer: followUpAnswers[q.id]
         }))];
-
+    
         try {
-            const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });  // Note the trailing slash
-
+            console.log('Sending request...');
+            const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });
+            console.log('Response received:', response);
+    
             if (response.status === 200) {
-                // Show success modal
                 setMessages(prevMessages => [
                     ...prevMessages,
                     { text: 'Success! Your app is now ready for review.', sender: 'bot' }
                 ]);
-                setShowSuccessPopup(true); // Show the success popup for real-time app preview
+                setShowSuccessPopup(true);
             } else {
                 throw new Error("Backend failure");
             }
         } catch (error) {
+            console.error('Error:', error);
             setMessages(prevMessages => [
                 ...prevMessages,
                 { text: 'There was an error sending your app idea to the backend.', sender: 'bot' }
             ]);
-            setShowRetryPopup(true); // Show retry option if failed
+            setShowRetryPopup(true);
         } finally {
-            setIsLoading(false); // Stop loading after response
+            setIsLoading(false);
+            setFinalized(true);  // Disable buttons only after API response
         }
     };
+    
 
     const handleRetake = () => {
         // Reset the currentQuestionIndex to 0 and retake the follow-up questions
@@ -331,10 +334,10 @@ const ChatbotPage = () => {
                     <LoadingWidget /> // Show loading spinner
                 ) : (
                     <div className="finalize-buttons">
-                        <button className="finalize-button" onClick={handleFinalizeAndBuild} disabled={finalized}>
+                        <button className="finalize-button" onClick={handleFinalizeAndBuild}>
                             Finalize and Build
                         </button>
-                        <button className="retake-button" onClick={handleRetake} disabled={finalized}>
+                        <button className="retake-button" onClick={handleRetake} >
                             Retake
                         </button>
                     </div>
@@ -393,14 +396,15 @@ const ChatbotPage = () => {
 
             {/* Success Popup */}
             {showSuccessPopup && (
-                <div className="success-popup">
-                    <div className="popup-content">
-                        <p>Success! Your app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
-                        <button onClick={() => window.location.href = '/app-preview'}>View</button> 
-                        <button onClick={() => setShowSuccessPopup(false)}>Close</button>
-                    </div>
+            <div className="success-popup">
+                <div className="popup-content">
+                    <p>Success! Your app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
+                    <button onClick={() => window.location.href = `/app-preview?appname=${appName}`}>View</button>
+                    <button onClick={() => setShowSuccessPopup(false)}>Close</button>
                 </div>
-            )}
+            </div>
+        )}
+
 
             {/* Retry Popup */}
             {showRetryPopup && (

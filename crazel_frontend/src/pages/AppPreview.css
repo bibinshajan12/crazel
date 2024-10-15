@@ -1,6 +1,6 @@
 /* App Preview Page Container */
 .app-preview-container {
-    background-color: #f4f4f9;
+    background-color: #62626e;
     color: #333;
     padding: 20px;
     max-width: 1200px;
@@ -86,4 +86,83 @@
 
 .preview-btn:hover {
     background-color: #008fcc;
+}
+
+.app-preview-container {
+    width: 80%;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.app-preview-container h2 {
+    color: #4a4a4a;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.app-preview-container button {
+    background-color: #1a73e8;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.app-preview-container button:hover {
+    background-color: #155bb5;
+}
+
+.app-preview-iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error-message {
+    color: #d9534f;
+    font-size: 1em;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.loading-message {
+    color: #4a90e2;
+    font-size: 1.2em;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.app-preview-container .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.app-preview-container .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1a73e8;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

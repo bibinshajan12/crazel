@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',     # CORS headers support
     # Your app
     'chatbot',
+    'app_preview',
 ]
 
 MIDDLEWARE = [
@@ -57,9 +58,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'disable_xframe_options.DisableXFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'crazel_backend.urls'
+X_FRAME_OPTIONS = 'ALLOWALL'  # Allow pages to be embedded in iframes from the same origin
+
 
 TEMPLATES = [
     {
