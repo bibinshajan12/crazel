@@ -1,0 +1,20 @@
+{
+    "name": "dartpad-backend",
+    "version": "1.0.0",
+    "description": "A backend for compiling Dart code and serving Flutter web projects.",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.17.1",
+      "child_process": "^1.0.2",
+      "fs": "0.0.1-security"
+    },
+    "engines": {
+      "node": ">=14.0.0"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  

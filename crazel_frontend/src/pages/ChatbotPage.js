@@ -21,6 +21,9 @@ const ChatbotPage = () => {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [showRetryPopup, setShowRetryPopup] = useState(false);
     const [isLoading, setIsLoading] = useState(false); 
+    const [gist_url, setGistUrl] = useState(''); // Store the gist URL for app preview
+    const [rephrasedMessage, setRephrasedMessage] = useState(''); // To store the rephrased response
+    const [showRephraseOptions, setShowRephraseOptions] = useState(false); // Control when to show rephrase options
 
     // Load chat data from localStorage when the component is mounted
     useEffect(() => {
@@ -74,22 +77,45 @@ const ChatbotPage = () => {
         }
     };
 
-    const handleSend = () => {
+    // Handle the input and send to backend for rephrasing
+    const handleSend = async () => {
         if (inputValue.trim() !== '') {
             const newMessage = { text: inputValue, sender: 'user' };
             setMessages([...messages, newMessage]);
-
+    
+            // Save the initial query
             if (!initialQuery) {
                 setInitialQuery(inputValue);
             }
-
+    
             if (isAppRelatedInput(inputValue)) {
-                setInputValue('');
-                setMessages(prevMessages => [
-                    ...prevMessages,
-                    { text: 'Are you a beginner or an experienced app builder?', sender: 'bot' }
-                ]);
-                setShowUserLevelModal(true); // Show the pop-up window modal
+                setInputValue(''); // Clear the input
+    
+                try {
+                    // Send the message to backend for rephrasing
+                    const response = await axios.post('/api/chatbot/rephrase/', { text: inputValue });
+    
+                    if (response.status === 200 && response.data.rephrased_text) {
+                        const rephrasedText = response.data.rephrased_text;
+    
+                        // Show the rephrased message and ask for confirmation
+                        setMessages(prevMessages => [
+                            ...prevMessages,
+                            { text: 'I have rephrased your query for better understanding:', sender: 'bot' },
+                            { text: rephrasedText, sender: 'bot' }
+                        ]);
+    
+                        // Save rephrased message for later reference and show options
+                        setRephrasedMessage(rephrasedText);
+                        setShowRephraseOptions(true); // Show the Yes/No/Exact options
+                    }
+                } catch (error) {
+                    console.error('Error rephrasing the input:', error);
+                    setMessages(prevMessages => [
+                        ...prevMessages,
+                        { text: 'Sorry, I couldn\'t rephrase your request. Please try again.', sender: 'bot' }
+                    ]);
+                }
             } else {
                 setInputValue('');
                 setMessages(prevMessages => [
@@ -99,6 +125,79 @@ const ChatbotPage = () => {
             }
         }
     };
+    
+    // Handle user response to the rephrase options
+    const handleRephraseResponse = async (responseType) => {
+        let confirmedMessage = '';
+    
+        if (responseType === 'confirm') {
+            confirmedMessage = `You confirmed: ${rephrasedMessage}`;
+            setMessages(prevMessages => [
+                ...prevMessages,
+                { text: confirmedMessage, sender: 'user' }
+            ]);
+            setShowRephraseOptions(false);
+            askFollowUpQuestions(); // Proceed with follow-up questions
+        } else if (responseType === 'reject') {
+            confirmedMessage = `You rejected the rephrase. Fetching an alternative rephrase...`;
+            
+            setMessages(prevMessages => [
+                ...prevMessages,
+                { text: confirmedMessage, sender: 'user' }
+            ]);
+            setIsLoading(true); // Show loading widget
+    
+            try {
+                // Retrigger the backend API to get another alternative rephrase
+                const response = await axios.post('/api/chatbot/rephrase/', { text: initialQuery });
+                
+                setIsLoading(false); // Hide loading widget
+    
+                if (response.status === 200 && response.data.rephrased_text) {
+                    const newRephrasedText = response.data.rephrased_text;
+                    
+                    setMessages(prevMessages => [
+                        ...prevMessages,
+                        { text: 'Here is an alternative rephrase:', sender: 'bot' },
+                        { text: newRephrasedText, sender: 'bot' }
+                    ]);
+                    setRephrasedMessage(newRephrasedText); // Update rephrased message
+                    setShowRephraseOptions(true); // Show the options again for the new rephrase
+                } else {
+                    setMessages(prevMessages => [
+                        ...prevMessages,
+                        { text: 'Failed to get an alternative rephrase. Please try again later.', sender: 'bot' }
+                    ]);
+                }
+            } catch (error) {
+                setIsLoading(false); // Hide loading widget
+                console.error('Error fetching alternative rephrase:', error);
+                setMessages(prevMessages => [
+                    ...prevMessages,
+                    { text: 'An error occurred while fetching an alternative rephrase.', sender: 'bot' }
+                ]);
+            }
+        } else if (responseType === 'exact') {
+            confirmedMessage = `You chose to proceed with your original request: ${messages[messages.length - 1].text}`;
+            setMessages(prevMessages => [
+                ...prevMessages,
+                { text: confirmedMessage, sender: 'user' }
+            ]);
+            setShowRephraseOptions(false);
+            askFollowUpQuestions(); // Proceed with follow-up questions
+        }
+    };
+    
+    
+    // Function to trigger follow-up questions after rephrasing confirmation
+    const askFollowUpQuestions = () => {
+        setMessages(prevMessages => [
+            ...prevMessages,
+            { text: 'Are you a beginner or an experienced app builder?', sender: 'bot' }
+        ]);
+        setShowUserLevelModal(true); // Show the beginner/experienced modal
+    };
+    
 
     // Handle user selection of beginner or experienced
     const handleUserLevelSelection = (level) => {
@@ -177,6 +276,8 @@ const ChatbotPage = () => {
 
         // Clear localStorage
         localStorage.clear();
+        // Reload the page to start fresh
+        window.location.reload();
     };
 
     const LoadingWidget = () => (
@@ -210,7 +311,11 @@ const ChatbotPage = () => {
         try {
             console.log('Sending request...');
             const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });
+            const { gist_url } = response.data;
+            setGistUrl(gist_url);
+
             console.log('Response received:', response);
+            console.log('gist_url received:', gist_url);
     
             if (response.status === 200) {
                 setMessages(prevMessages => [
@@ -297,6 +402,15 @@ const ChatbotPage = () => {
                         <p>Welcome! Ready to create an app with Crazel?</p>
                         <button onClick={handleOkClick}>OK</button>
                     </div>
+                </div>
+            )}
+            {showRephraseOptions && (
+                <div className="rephrase-options">
+                    <p>Does this sound right to you?</p>
+                    <p>{rephrasedMessage}</p>
+                    <button onClick={() => handleRephraseResponse('confirm')}>Yes, this is what I want</button>
+                    <button onClick={() => handleRephraseResponse('reject')}>No, check again</button>
+                    <button onClick={() => handleRephraseResponse('exact')}>Just give me exactly what I ask</button>
                 </div>
             )}
 
@@ -394,17 +508,21 @@ const ChatbotPage = () => {
                 </div>
             )}
 
-            {/* Success Popup */}
-            {showSuccessPopup && (
-            <div className="success-popup">
-                <div className="popup-content">
-                    <p>Success! Your app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
-                    <button onClick={() => window.location.href = `/app-preview?appname=${appName}`}>View</button>
-                    <button onClick={() => setShowSuccessPopup(false)}>Close</button>
-                </div>
-            </div>
-        )}
+             {/* Success Popup */}
+             {showSuccessPopup && (
+                <div className="success-popup">
+                    <div className="popup-content">
+                        <p>Success! Your app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
+                        <button
+                            onClick={() => window.location.href = `/app-preview?appname=${appName}&gisturl=${encodeURIComponent(gist_url)}`}
 
+                        >
+                            View
+                        </button>
+                        <button onClick={() => setShowSuccessPopup(false)}>Close</button>
+                    </div>
+                </div>
+            )}
 
             {/* Retry Popup */}
             {showRetryPopup && (

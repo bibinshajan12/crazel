@@ -1,26 +1,31 @@
-# Stage 1: Build Flutter Web App
-FROM cirrusci/flutter:latest AS build
+# Use a stable version of Flutter and install Node.js v18
+FROM cirrusci/flutter:stable
 
-# Set the working directory inside the container
+# Install Node.js (v18) and npm
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Upgrade npm to the latest version compatible with Node.js v18
+RUN npm install -g npm@latest
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the Flutter project files to the container
-COPY . .
+# Copy package.json and install dependencies
+COPY package.json /app/
+RUN npm install
 
-# Install dependencies
+# Copy the rest of the application code
+COPY . /app/
+
+# Ensure Flutter dependencies are ready
+RUN flutter precache
 RUN flutter pub get
 
-# Build the Flutter web app
-RUN flutter build web
+# Expose the port (adjust if necessary)
+EXPOSE 5001
 
-# Stage 2: Serve the Flutter Web App with Nginx
-FROM nginx:alpine
-
-# Copy the built Flutter web files from the build stage to the Nginx public directory
-COPY --from=build /app/build/web /usr/share/nginx/html
-
-# Expose port 80 to serve the app
-EXPOSE 80
-
-# Start the Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# Start the application
+CMD ["node", "server.js"]

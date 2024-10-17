@@ -1,63 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 import './AppPreview.css';
 
-const AppPreview = () => {
-    const location = useLocation();
-    const [appname, setAppName] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [previewUrl, setPreviewUrl] = useState('');
+function AppPreview() {
+  const location = useLocation();
+  const [appName, setAppName] = useState('');
+  const [gistUrl, setGistUrl] = useState('');
+  const [gistId, setGistId] = useState('');  // Store the extracted Gist ID
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const iframeId = 'dartpad-preview';
 
-    useEffect(() => {
-        // Extract the 'appname' from the URL query parameter
-        const queryParams = new URLSearchParams(location.search);
-        const appnameParam = queryParams.get('appname');
-        if (appnameParam) {
-            setAppName(appnameParam);
-        }
-    }, [location]);
+  // Extract appName and gistUrl from the query string
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const appnameParam = params.get('appname');
+    const gistUrlParam = params.get('gisturl');
 
-    const handleBuildAndPreview = async () => {
-        setLoading(true);
-        setError('');
+    if (appnameParam) {
+      console.log(`App name from query string: ${appnameParam}`);
+      setAppName(appnameParam);
+    }
 
-        try {
-            // Trigger the Flutter build process via the backend
-            const response = await axios.get(`/api/apppreview/view/${appname}/`);
-            console.log('call is here 1')
-            if (response.status === 200) {
-                console.log('call is here 2')
-                // Set the preview URL to load the Flutter app in an iframe after a successful build
-                const cacheBustingParam = `?t=${new Date().getTime()}`;
-                setPreviewUrl(`http://localhost:8000/api/apppreview/serveflutterapp/${appname}/${cacheBustingParam}`);
-            } else {
-                setError('Failed to build the app. Please try again.');
-            }
-        } catch (e) {
-            setError('Failed to build or preview the app. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (gistUrlParam) {
+      const decodedGistUrl = decodeURIComponent(gistUrlParam);
+      console.log(`Gist URL from query string: ${decodedGistUrl}`);
+      setGistUrl(decodedGistUrl);
 
-    return (
-        <div className="app-preview-container">
-            <h2>App Preview for {appname}</h2>
-            <button onClick={handleBuildAndPreview} disabled={loading}>
-                {loading ? 'Building...' : 'Build and Preview App'}
-            </button>
-            {error && <p className="error-message">{error}</p>}
-            {previewUrl && (
-                <iframe
-                    title="Flutter App Preview"
-                    src={previewUrl}
-                    className="app-preview-iframe"
-                ></iframe>
-            )}
+      // Extract the Gist ID (last part of the URL after the "/")
+      const gistIdExtracted = decodedGistUrl.split('/').pop();
+      console.log(`Extracted Gist ID: ${gistIdExtracted}`);
+      setGistId(gistIdExtracted);
+
+      // Set loading to false since we have the Gist ID and can now display the iframe
+      setLoading(false);
+    }
+  }, [location]);
+
+  // DartPad embed URL with the extracted Gist ID, directly showing the app
+  const dartPadEmbedUrl = `https://dartpad.dev/?id=${gistId}&embed=true&run=true&split=100&output-only=true`;
+
+  return (
+    <div className="app-preview-container">
+      {loading ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <div className="loading-text">
+            Loading the app preview, please wait...
+          </div>
         </div>
-    );
-};
+      ) : (
+        <div className="device-frame">
+          <iframe
+            id={iframeId}
+            src={dartPadEmbedUrl}
+            width="100%"
+            height="600px"
+            style={{ border: 'none' }}
+            title="App Preview"
+          />
+        </div>
+      )}
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default AppPreview;

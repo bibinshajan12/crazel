@@ -870,3 +870,57 @@
     font-size: 1.2rem;
     color: #333;
 }
+
+/* Rephrase Options Container */
+.rephrase-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    background-color: #1f1f1f; /* Dark background to match the theme */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    width: 100%; /* Full width */
+    max-width: 500px; /* Limit the maximum width */
+    margin: 20px auto; /* Center the rephrase section */
+}
+
+/* Button Styles */
+.rephrase-options button {
+    background-color: #00aaff; /* Light blue */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px 0;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 80%; /* Full width for larger buttons */
+    max-width: 400px; /* Limit button width */
+}
+
+.rephrase-options button:hover {
+    background-color: #008fcc;
+    transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* Specific Button Colors */
+.rephrase-options .reject-button {
+    background-color: #f44336; /* Red for rejection */
+}
+
+.rephrase-options .exact-button {
+    background-color: #00c853; /* Green for exact choice */
+}
+
+/* Hover Effects for Specific Buttons */
+.rephrase-options .reject-button:hover {
+    background-color: #d32f2f;
+}
+
+.rephrase-options .exact-button:hover {
+    background-color: #00a244;
+}

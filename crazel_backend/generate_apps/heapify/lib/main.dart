@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(
+      ChangeNotifierProvider(
+        create: (context) => MyProvider(),
+        child: MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
   @override
@@ -16,9 +23,10 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      initialRoute: '/home',
       routes: {
         '/': (context) => HomeScreen(),
+        '/home': (context) => MyHomePage(),
         '/login': (context) => LoginScreen(),
       },
       onGenerateRoute: (settings) {
@@ -48,8 +56,8 @@ class HomeScreen extends StatelessWidget {
         child: Text('Welcome to my business app!'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/login'),
-        child: Icon(Icons.login),
+        onPressed: () => Navigator.pushNamed(context, '/home'),
+        child: Icon(Icons.person),
       ),
     );
   }
@@ -99,13 +107,13 @@ class SettingsScreen extends StatelessWidget {
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final Function onPressed;
+  final VoidCallback onPressed;
 
-  CustomButton({this.text, this.onPressed});
+  CustomButton({required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
+    return ElevatedButton(
       onPressed: onPressed,
       child: Text(text),
     );
@@ -113,21 +121,31 @@ class CustomButton extends StatelessWidget {
 }
 
 class User {
+  final int id;
   final String name;
-  final int age;
+  final String username;
+  final String email;
 
-  User({this.name, this.age});
+  User(
+      {required this.id,
+      required this.name,
+      required this.username,
+      required this.email});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      name: json['name'],
-      age: json['age'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'name': name,
-        'age': age,
+        'username': username,
+        'email': email,
       };
 }
 
@@ -135,7 +153,7 @@ class ApiService {
   final String baseUrl = 'https://jsonplaceholder.typicode.com';
 
   Future<List<User>> getUsers() async {
-    final response = await http.get('$baseUrl/users');
+    final response = await http.get(Uri.parse('$baseUrl/users'));
 
     if (response.statusCode == 200) {
       List<dynamic> userJson = json.decode(response.body);
@@ -151,10 +169,9 @@ class MyProvider with ChangeNotifier {
 
   List<User> get users => _users;
 
-  ApiService _apiService;
+  ApiService _apiService = ApiService();
 
   MyProvider() {
-    _apiService = ApiService();
     _loadData();
   }
 
@@ -167,5 +184,23 @@ class MyProvider with ChangeNotifier {
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final myProvider = Provider.of<MyProvider>(context);
     return Scaffold(
-      appBar: AppBar
+      appBar: AppBar(
+        title: Text('User List'),
+      ),
+      body: myProvider.users.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: myProvider.users.length,
+              itemBuilder: (context, index) {
+                final user = myProvider.users[index];
+                return ListTile(
+                  title: Text(user.name),
+                  subtitle: Text(user.email),
+                );
+              },
+            ),
+    );
+  }
+}

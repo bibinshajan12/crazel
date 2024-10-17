@@ -1,0 +1,20 @@
+# Use the official Flutter image
+FROM cirrusci/flutter:latest
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the entire app directory into the container
+COPY . /app
+
+# Run flutter packages get
+RUN flutter pub get
+
+# Build the web app
+RUN flutter build web
+
+# Expose port if needed (for development)
+EXPOSE 8080
+
+# Command to run when starting the container (optional)
+CMD ["flutter", "run", "-d", "web-server", "--web-port", "8080"]

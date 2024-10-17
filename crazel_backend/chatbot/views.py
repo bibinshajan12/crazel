@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 import openai
 import re
 from django.http import HttpResponse
+import requests
+import json
 
 
 # Set up logging
@@ -22,6 +24,8 @@ load_dotenv()
 endpoint = os.getenv("ENDPOINT_URL", "https://husky-m2813bok-westeurope.openai.azure.com/")
 deployment = os.getenv("DEPLOYMENT_NAME", "gpt-35-turbo")
 subscription_key = os.getenv("AZURE_OPENAI_API_KEY", "REPLACE_WITH_YOUR_KEY_VALUE_HERE")
+github_token = os.getenv("GITHUB_TOKEN", "REPLACE_WITH_YOUR_GITHUB_TOKEN")
+
 
 # Configure OpenAI
 openai.api_type = "azure"
@@ -73,13 +77,19 @@ class BuildAppAPIView(APIView):
 
             # Generate the Flutter app code using Azure OpenAI
             app_files = None
-            # app_files = self.call_azure_openapi(messages)
-            # print(f'the response received from openai is {app_files}')
-            # create_flutter_files(app_files, appname)
+            app_files = self.call_azure_openapi(messages)
+            print(f'the response received from openai is {app_files}')
+            create_flutter_files(app_files, appname)
+            gist_url = self.create_gist(appname)
+            print(f"Gist created at {gist_url}")
             
 
             print('App has been generated successfully.')
-            return Response({"success": True, "message": "App has been generated successfully."}, status=status.HTTP_200_OK)
+            return Response({
+            "success": True,
+            "message": "App has been generated successfully.",
+            "gist_url": gist_url
+        }, status=status.HTTP_200_OK)
 
         except ValueError as e:
             logger.error(f"Configuration error: {e}")
@@ -87,6 +97,58 @@ class BuildAppAPIView(APIView):
         except Exception as e:
             logger.exception('An error occurred while building the app.')
             return Response({"error": "An internal error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def create_gist(self, file_name):
+        """
+        Upload the Dart file as a public GitHub Gist.
+        
+        :param dart_code: Dart code content as a string
+        :param file_name: Name of the Dart file (e.g., 'main.dart')
+        :return: URL of the created Gist
+        """
+
+        base_dir = f'generate_apps/{file_name}/lib/main.dart'
+        # API endpoint for creating a Gist
+        url = "https://api.github.com/gists"
+        
+        if not os.path.exists(base_dir):
+            print(f"Error: File not found at {base_dir}")
+            return None
+
+        # Read the content of the Dart file
+        with open(base_dir, 'r') as file:
+            dart_code = file.read()
+
+
+        # Gist file content in JSON format
+        payload = {
+            "description": "Dart code uploaded via API",
+            "public": True,  # Public Gist
+            "files": {
+                f"{file_name}_main.dart": {
+                    "content": dart_code
+                }
+            }
+        }
+
+        # GitHub token for authentication
+        headers = {
+            "Authorization": f"token {github_token}",
+            "Content-Type": "application/json"
+        }
+
+        # Make the POST request to GitHub API
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+        # Check if the request was successful
+        if response.status_code == 201:
+            gist_url = response.json()["html_url"]
+            print(f"Gist created successfully: {gist_url}")
+            return gist_url
+        else:
+            print(f"Error: {response.status_code} - {response.json()}")
+            return None
+        
 
     def create_prompt(self, chat_history):
         """Create a detailed prompt based on user requirements."""
@@ -255,3 +317,47 @@ def get_pubspec_yaml(request, appname):
         return HttpResponse(content, content_type="text/plain")
     else:
         return HttpResponse("pubspec.yaml not found", status=404)
+
+
+
+class RephraseAPIView(APIView):
+
+    def call_azure_openapi(self, messages):
+        """Call Azure OpenAI API to generate the app code."""
+        try:
+            response = openai.ChatCompletion.create(
+                engine=deployment,
+                messages=messages,
+                max_tokens=800,
+                temperature=0.7,
+                top_p=0.95,
+                frequency_penalty=0,
+                presence_penalty=0
+            )
+            return response['choices'][0]['message']['content'].strip()
+        except Exception as e:
+            logger.error(f"Failed to call Azure OpenAI API: {e}")
+            raise
+
+    def post(self, request):
+        user_input = request.data.get('text', '')
+        print('call is here')
+        if not user_input:
+            return Response({"error": "No input text provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Rephrase the user input
+        try:
+            prompt = f"Create a well-structured prompt to help design an app based on the following idea: '{user_input}'. Please rephrase it to be more suitable for a common man to understand what you think of his requirement and how you are going to design the solution it should include the screens you might give, what kind of actions can be done on the app and what are the features of the app that you can use it for"
+
+            messages = [
+                {"role": "system", "content": "You are an AI assistant who helps people to ideate and better rephrase their app ideas, which can be send to open ai to create the backend for the mobile app that the user wants to create. Your response will start as : So you mean - "},
+                {"role": "user", "content": prompt}
+            ]
+            
+            response = self.call_azure_openapi(messages)
+            print(f'the response receied is {response}')
+
+            return Response({"rephrased_text": response}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

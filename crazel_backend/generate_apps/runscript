@@ -1,0 +1,29 @@
+function Show-Tree {
+    param (
+        [string]$Path = ".",
+        [int]$Depth = 2,
+        [string]$Prefix = ""
+    )
+
+    # If depth is 0, stop recursion
+    if ($Depth -eq 0) {
+        return
+    }
+
+    # Get all items (directories and files)
+    $items = Get-ChildItem -LiteralPath $Path
+
+    # Loop through each item
+    foreach ($item in $items) {
+        # Print the item (file or folder) with a tree-like structure
+        Write-Host "$Prefix└── $($item.Name)"
+
+        # If the item is a directory, recurse into it
+        if ($item.PSIsContainer) {
+            Show-Tree -Path $item.FullName -Depth ($Depth - 1) -Prefix "$Prefix    "
+        }
+    }
+}
+
+# Run the Show-Tree function
+Show-Tree -Path "C:\Users\bshajan\OneDrive - Capgemini\Desktop\codebase\huskyracer\crazel-web-app\crazel_backend\generate_apps" -Depth 2
