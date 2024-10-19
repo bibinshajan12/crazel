@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import axios from 'axios';
 import './AppPreview.css';
 
 function AppPreview() {
   const location = useLocation();
   const [appName, setAppName] = useState('');
   const [gistUrl, setGistUrl] = useState('');
-  const [gistId, setGistId] = useState('');  // Store the extracted Gist ID
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [suggestion, setSuggestion] = useState('');  // To hold user input for suggestions
+  const [llmSuggestedChanges, setLLMSuggestedChanges] = useState('');  // To hold the LLM suggested changes
+  const [iframeKey, setIframeKey] = useState(0); // Key to force iframe reload
+  const [loading, setLoading] = useState(false);  // Loading state
   const iframeId = 'dartpad-preview';
 
   // Extract appName and gistUrl from the query string
@@ -18,54 +20,110 @@ function AppPreview() {
     const gistUrlParam = params.get('gisturl');
 
     if (appnameParam) {
-      console.log(`App name from query string: ${appnameParam}`);
       setAppName(appnameParam);
     }
-
     if (gistUrlParam) {
-      const decodedGistUrl = decodeURIComponent(gistUrlParam);
-      console.log(`Gist URL from query string: ${decodedGistUrl}`);
-      setGistUrl(decodedGistUrl);
-
-      // Extract the Gist ID (last part of the URL after the "/")
-      const gistIdExtracted = decodedGistUrl.split('/').pop();
-      console.log(`Extracted Gist ID: ${gistIdExtracted}`);
-      setGistId(gistIdExtracted);
-
-      // Set loading to false since we have the Gist ID and can now display the iframe
-      setLoading(false);
+      setGistUrl(decodeURIComponent(gistUrlParam));
     }
   }, [location]);
 
-  // DartPad embed URL with the extracted Gist ID, directly showing the app
-  const dartPadEmbedUrl = `https://dartpad.dev/?id=${gistId}&embed=true&run=true&split=100&output-only=true`;
+  // Function to handle the user's suggestion submission
+  const handleSuggestionSubmit = async () => {
+    try {
+      setLoading(true); // Set loading to true while processing
+
+      // Send suggestion to LLM backend to process and modify the Dart code
+      const response = await axios.post('/api/llm/suggest-change', {
+        app_name: appName,
+        changes: suggestion,
+        gist_url: gistUrl,
+      });
+
+      if (response.data.suggestedChanges) {
+        setLLMSuggestedChanges(response.data.suggestedChanges); // Show suggested changes from LLM
+      } else {
+        console.error('No changes returned from LLM');
+      }
+      
+      setLoading(false); // End loading
+    } catch (error) {
+      console.error('Error updating Dart code via LLM:', error);
+      setLoading(false); // End loading
+    }
+  };
+
+  // Function to apply the LLM changes and update the gist
+  const applyLLMChanges = async () => {
+    try {
+      setLoading(true); // Set loading to true while processing
+
+      // Apply the changes to the gist
+      const updateResponse = await axios.post('/api/gist/update', {
+        app_name: appName,
+        new_dart_code: llmSuggestedChanges,
+        gist_url: gistUrl,
+      });
+
+      if (updateResponse.data.gist_url) {
+        setGistUrl(updateResponse.data.gist_url);  // Update gist URL with the new one
+        setIframeKey((prevKey) => prevKey + 1);    // Reload the iframe with new Dart code
+        setLLMSuggestedChanges(''); // Clear the suggested changes after applying
+      }
+
+      setLoading(false); // End loading
+    } catch (error) {
+      console.error('Error applying LLM changes:', error);
+      setLoading(false); // End loading
+    }
+  };
+
+  // DartPad embed URL to show only the output (no code editor)
+  const dartPadEmbedUrl = `https://dartpad.dev/embed-flutter.html?run=true&split=0&id=${gistUrl.split('/').pop()}`;
 
   return (
     <div className="app-preview-container">
-      {loading ? (
-        <div className="loading-container">
-          <div className="spinner"></div>
-          <div className="loading-text">
-            Loading the app preview, please wait...
+      <div className="phone-container">
+        <div className="phone-frame">
+          {loading ? (
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <div className="loading-text">
+                Applying changes, please wait...
+              </div>
+            </div>
+          ) : (
+            <iframe
+              key={iframeKey}
+              id={iframeId}
+              src={dartPadEmbedUrl}
+              className="phone-iframe"
+              title="DartPad Preview"
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="suggestion-box">
+        <h3>Suggest Changes</h3>
+        <textarea
+          value={suggestion}
+          onChange={(e) => setSuggestion(e.target.value)}
+          placeholder="Suggest changes to the app..."
+        />
+        <button onClick={handleSuggestionSubmit} disabled={loading}>
+          {loading ? 'Processing...' : 'Submit Changes'}
+        </button>
+
+        {llmSuggestedChanges && (
+          <div className="llm-suggestions">
+            <h4>LLM Suggested Changes</h4>
+            <pre>{llmSuggestedChanges}</pre>
+            <button onClick={applyLLMChanges} disabled={loading}>
+              {loading ? 'Applying Changes...' : 'Apply Changes'}
+            </button>
           </div>
-        </div>
-      ) : (
-        <div className="device-frame">
-          <iframe
-            id={iframeId}
-            src={dartPadEmbedUrl}
-            width="100%"
-            height="600px"
-            style={{ border: 'none' }}
-            title="App Preview"
-          />
-        </div>
-      )}
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

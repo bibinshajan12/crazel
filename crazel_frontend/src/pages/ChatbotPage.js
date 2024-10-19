@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ChatbotPage.css';
 import followUpQuestions from './questions'; // Importing the questions from the new file
 import axios from 'axios'; // Importing axios to send the data to the backend
@@ -20,10 +20,13 @@ const ChatbotPage = () => {
     const [showAppNamePrompt, setShowAppNamePrompt] = useState(false); // Control showing the app name prompt
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [showRetryPopup, setShowRetryPopup] = useState(false);
-    const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false);
     const [gist_url, setGistUrl] = useState(''); // Store the gist URL for app preview
     const [rephrasedMessage, setRephrasedMessage] = useState(''); // To store the rephrased response
     const [showRephraseOptions, setShowRephraseOptions] = useState(false); // Control when to show rephrase options
+    const [isEditing, setIsEditing] = useState(false); // For editing rephrased message
+    const [editedRephrasedMessage, setEditedRephrasedMessage] = useState(''); // Store edited rephrased message
+    const editableInputRef = useRef(null);
 
     // Load chat data from localStorage when the component is mounted
     useEffect(() => {
@@ -82,31 +85,32 @@ const ChatbotPage = () => {
         if (inputValue.trim() !== '') {
             const newMessage = { text: inputValue, sender: 'user' };
             setMessages([...messages, newMessage]);
-    
+
             // Save the initial query
             if (!initialQuery) {
                 setInitialQuery(inputValue);
             }
-    
+
             if (isAppRelatedInput(inputValue)) {
                 setInputValue(''); // Clear the input
-    
+
                 try {
                     // Send the message to backend for rephrasing
                     const response = await axios.post('/api/chatbot/rephrase/', { text: inputValue });
-    
+
                     if (response.status === 200 && response.data.rephrased_text) {
                         const rephrasedText = response.data.rephrased_text;
-    
+
                         // Show the rephrased message and ask for confirmation
                         setMessages(prevMessages => [
                             ...prevMessages,
                             { text: 'I have rephrased your query for better understanding:', sender: 'bot' },
                             { text: rephrasedText, sender: 'bot' }
                         ]);
-    
+
                         // Save rephrased message for later reference and show options
                         setRephrasedMessage(rephrasedText);
+                        setEditedRephrasedMessage(rephrasedText); // Prefill the editable message
                         setShowRephraseOptions(true); // Show the Yes/No/Exact options
                     }
                 } catch (error) {
@@ -125,11 +129,49 @@ const ChatbotPage = () => {
             }
         }
     };
+
+    const handleFollowUpAnswerChange = (id, value, isMultiSelect = false) => {
+        setFollowUpAnswers((prevAnswers) => {
+            if (isMultiSelect) {
+                // If multi-selection is allowed, toggle the selected value
+                const prevSelected = prevAnswers[id] || [];
+                const updatedSelected = prevSelected.includes(value)
+                    ? prevSelected.filter(item => item !== value) // Remove if already selected
+                    : [...prevSelected, value]; // Add new value
+                return { ...prevAnswers, [id]: updatedSelected };
+            } else {
+                // For single select dropdowns
+                return { ...prevAnswers, [id]: value };
+            }
+        });
+    };
     
+
+    // Function to handle editing the rephrased text
+    const handleEditAndAccept = () => {
+        setIsEditing(true);
+        setTimeout(() => {
+            if (editableInputRef.current) {
+                editableInputRef.current.focus(); // Automatically focus on the editable input field
+            }
+        }, 0);
+    };
+
+    // Function to handle the final acceptance of the edited message
+    const handleAcceptEditedMessage = () => {
+        setMessages(prevMessages => [
+            ...prevMessages,
+            { text: `You confirmed: ${editedRephrasedMessage}`, sender: 'user' } // User confirmation as their message
+        ]);
+        setShowRephraseOptions(false); // Hide the options
+        setIsEditing(false); // Reset editing state
+        askFollowUpQuestions(); // Proceed with follow-up questions
+    };
+
     // Handle user response to the rephrase options
     const handleRephraseResponse = async (responseType) => {
         let confirmedMessage = '';
-    
+
         if (responseType === 'confirm') {
             confirmedMessage = `You confirmed: ${rephrasedMessage}`;
             setMessages(prevMessages => [
@@ -140,22 +182,22 @@ const ChatbotPage = () => {
             askFollowUpQuestions(); // Proceed with follow-up questions
         } else if (responseType === 'reject') {
             confirmedMessage = `You rejected the rephrase. Fetching an alternative rephrase...`;
-            
+
             setMessages(prevMessages => [
                 ...prevMessages,
                 { text: confirmedMessage, sender: 'user' }
             ]);
             setIsLoading(true); // Show loading widget
-    
+
             try {
                 // Retrigger the backend API to get another alternative rephrase
                 const response = await axios.post('/api/chatbot/rephrase/', { text: initialQuery });
-                
+
                 setIsLoading(false); // Hide loading widget
-    
+
                 if (response.status === 200 && response.data.rephrased_text) {
                     const newRephrasedText = response.data.rephrased_text;
-                    
+
                     setMessages(prevMessages => [
                         ...prevMessages,
                         { text: 'Here is an alternative rephrase:', sender: 'bot' },
@@ -187,8 +229,7 @@ const ChatbotPage = () => {
             askFollowUpQuestions(); // Proceed with follow-up questions
         }
     };
-    
-    
+
     // Function to trigger follow-up questions after rephrasing confirmation
     const askFollowUpQuestions = () => {
         setMessages(prevMessages => [
@@ -197,7 +238,6 @@ const ChatbotPage = () => {
         ]);
         setShowUserLevelModal(true); // Show the beginner/experienced modal
     };
-    
 
     // Handle user selection of beginner or experienced
     const handleUserLevelSelection = (level) => {
@@ -232,14 +272,7 @@ const ChatbotPage = () => {
         }, 1000);
     };
 
-    const handleFollowUpAnswerChange = (id, value) => {
-        // Save the answer in the state
-        setFollowUpAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            [id]: value
-        }));
-    };
-
+    
     const handleNextQuestion = () => {
         const currentQuestion = filteredQuestions[currentQuestionIndex];
 
@@ -302,20 +335,28 @@ const ChatbotPage = () => {
     const handleFinalizeAndBuild = async () => {
         setIsLoading(true);
     
-        // Send chat history along with app name to the backend to build the prompt
-        const chatHistory = [...messages, ...filteredQuestions.map(q => ({
-            question: q.question,
-            answer: followUpAnswers[q.id]
-        }))];
+        // Create chat history including multi-selected answers
+        const chatHistory = [
+            ...messages, // Include all messages so far
+            {
+                text: `Initial query: ${initialQuery}`, // The original input
+                sender: 'user',
+            },
+            {
+                text: `Rephrased query: ${rephrasedMessage}`, // The rephrased query from the bot
+                sender: 'bot',
+            },
+            // Add follow-up questions and answers (including multi-select answers)
+            ...filteredQuestions.map((q) => ({
+                question: q.question,
+                answer: Array.isArray(followUpAnswers[q.id]) ? followUpAnswers[q.id].join(', ') : followUpAnswers[q.id], // Handle multi-select answers
+            })),
+        ];
     
         try {
-            console.log('Sending request...');
             const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });
             const { gist_url } = response.data;
             setGistUrl(gist_url);
-
-            console.log('Response received:', response);
-            console.log('gist_url received:', gist_url);
     
             if (response.status === 200) {
                 setMessages(prevMessages => [
@@ -349,7 +390,7 @@ const ChatbotPage = () => {
 
     const renderCurrentQuestion = () => {
         const currentQuestion = filteredQuestions[currentQuestionIndex];
-        const savedAnswer = followUpAnswers[currentQuestion?.id] || ''; // Pre-fill the answer if it exists
+        const savedAnswer = followUpAnswers[currentQuestion?.id] || []; // For multi-select, assume an array
 
         if (!currentQuestion) {
             return null; // If no question is available, do not render anything
@@ -359,25 +400,43 @@ const ChatbotPage = () => {
             <div className="question-box">
                 <label>{currentQuestion.question}</label>
                 {currentQuestion.type === 'dropdown' ? (
-                    <select
-                        className="follow-up-dropdown"
-                        value={savedAnswer} // Pre-fill the selected option
-                        onChange={(e) => handleFollowUpAnswerChange(currentQuestion.id, e.target.value)}
-                    >
-                        <option value="">Select an option</option>
-                        {currentQuestion.options.map((option, idx) => (
-                            <option key={idx} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
+                    currentQuestion.multiSelect ? (
+                        // Multi-select checkboxes
+                        <div>
+                            {currentQuestion.options.map((option, idx) => (
+                                <div key={idx} className="multi-select-option">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value={option}
+                                            checked={savedAnswer.includes(option)} // Check if already selected
+                                            onChange={(e) => handleFollowUpAnswerChange(currentQuestion.id, option, true)}
+                                        />
+                                        {option}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        // Single-select dropdown
+                        <select
+                            className="follow-up-dropdown"
+                            value={savedAnswer} // Pre-fill the selected option
+                            onChange={(e) => handleFollowUpAnswerChange(currentQuestion.id, e.target.value)}
+                        >
+                            <option value="">Select an option</option>
+                            {currentQuestion.options.map((option, idx) => (
+                                <option key={idx} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                    )
                 ) : (
                     <textarea
                         className="follow-up-text"
                         value={savedAnswer}
-                        onChange={(e) => {
-                            handleFollowUpAnswerChange(currentQuestion.id, e.target.value);
-                        }}
+                        onChange={(e) => handleFollowUpAnswerChange(currentQuestion.id, e.target.value)}
                         placeholder="Type your response..."
                     />
                 )}
@@ -404,13 +463,33 @@ const ChatbotPage = () => {
                     </div>
                 </div>
             )}
+
             {showRephraseOptions && (
                 <div className="rephrase-options">
                     <p>Does this sound right to you?</p>
-                    <p>{rephrasedMessage}</p>
-                    <button onClick={() => handleRephraseResponse('confirm')}>Yes, this is what I want</button>
-                    <button onClick={() => handleRephraseResponse('reject')}>No, check again</button>
-                    <button onClick={() => handleRephraseResponse('exact')}>Just give me exactly what I ask</button>
+                    {isEditing ? (
+                        // Editable input field for rephrased message
+                        <textarea
+                            ref={editableInputRef} // Attach reference to focus the textarea
+                            value={editedRephrasedMessage}
+                            onChange={(e) => setEditedRephrasedMessage(e.target.value)}
+                            className="editable-rephrase-input"
+                        />
+                    ) : (
+                        <p>{rephrasedMessage}</p>
+                    )}
+
+                    {isEditing ? (
+                        // Accept button when editing
+                        <button onClick={handleAcceptEditedMessage}>Accept</button>
+                    ) : (
+                        <>
+                            <button onClick={() => handleEditAndAccept()}>Edit and Accept</button>
+                            <button onClick={() => handleAcceptEditedMessage()}>Yes, this is what I want</button>
+                            <button onClick={() => handleRephraseResponse('reject')}>No, check again</button>
+                            <button onClick={() => handleRephraseResponse('exact')}>Just give me exactly what I ask</button>
+                        </>
+                    )}
                 </div>
             )}
 

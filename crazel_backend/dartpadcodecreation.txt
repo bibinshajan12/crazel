@@ -1,0 +1,23 @@
+1. The UI should be visually stunning, with a clean, gradient background and modern layout.
+2. Use appealing fonts, simple but elegant design elements, and follow modern UI/UX principles.
+3. Incorporate fluid transitions between screens to provide a smooth, immersive user experience.
+4. Buttons should be well-designed, interactive, and responsive, with rounded corners and pleasing animations.
+5. The app should include a simple, elegant AppBar with a title.
+6. Interactive elements such as sliders, checkboxes, or toggles should be present, improving user engagement.
+7. Ensure the app runs efficiently in DartPad with no unnecessary dependencies that may cause performance or rendering issues.
+8. The core logic of the app should remain intact based on the user's requirements, but the focus should be on making it look beautiful and run smoothly.
+9. Do **not** include a login screen or authentication mechanisms unless the user explicitly requests them.
+
+Please provide a refactored Dart file that can be directly copied into DartPad and renders without issues.
+
+
+**Note**: 
+Please ensure that there is no preamble, no additional explanations, the response should start should just give the  `main.dart` file.    
+
+Make sure the generated code is:
+Optimized for DartPad or any standard Flutter development environment.
+Compatible with the latest Flutter SDK version, ensuring no deprecated methods, properties, or APIs are used (e.g., use backgroundColor for buttons instead of primary in ElevatedButton).
+Efficient and smooth in performance, with a clean and simple structure, avoiding unnecessary dependencies that might cause errors.
+Rendered with a modern UI based on the latest Flutter widget and design guidelines.
+Ready to be directly copied into DartPad for immediate execution without modification.
+Please do not include any preamble or unnecessary comments. Only the Dart code for the main.dart file is needed.

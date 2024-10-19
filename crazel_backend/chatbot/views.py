@@ -41,7 +41,7 @@ class BuildAppAPIView(APIView):
             response = openai.ChatCompletion.create(
                 engine=deployment,
                 messages=messages,
-                max_tokens=800,
+                max_tokens=4000,
                 temperature=0.7,
                 top_p=0.95,
                 frequency_penalty=0,
@@ -53,25 +53,26 @@ class BuildAppAPIView(APIView):
             raise
 
     def post(self, request):
-        print('Received POST request to build app.')
         chat_history = request.data.get('chatHistory')
         appname = request.data.get('appName')
-        print(f'the app name is {appname}')
         if not chat_history:
             logger.warning('No chat history provided in the request.')
             return Response({"error": "No chat history provided."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Generate a prompt based on the chat history
-            prompt = self.create_prompt(chat_history)
+            prompt = self.create_prompt(appname, chat_history)
             print(f'the full prompt is {prompt}')
             if not prompt:
                 logger.error('Failed to create a prompt from the chat history.')
                 return Response({"error": "Invalid chat history provided."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            with open('chatbot_system_message.txt', 'r') as file:
+                chatbot_system_message = file.read()
 
             # Prepare messages for the Azure OpenAI API
             messages = [
-                {"role": "system", "content": "You are an AI assistant that helps people find information."},
+                {"role": "system", "content": chatbot_system_message},
                 {"role": "user", "content": prompt}
             ]
 
@@ -79,7 +80,7 @@ class BuildAppAPIView(APIView):
             app_files = None
             app_files = self.call_azure_openapi(messages)
             print(f'the response received from openai is {app_files}')
-            create_flutter_files(app_files, appname)
+            create_flutter_files(app_files, appname,dartpad=True)
             gist_url = self.create_gist(appname)
             print(f"Gist created at {gist_url}")
             
@@ -98,7 +99,7 @@ class BuildAppAPIView(APIView):
             logger.exception('An error occurred while building the app.')
             return Response({"error": "An internal error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    def create_gist(self, file_name):
+    def create_gist(self, appname):
         """
         Upload the Dart file as a public GitHub Gist.
         
@@ -107,26 +108,65 @@ class BuildAppAPIView(APIView):
         :return: URL of the created Gist
         """
 
-        base_dir = f'generate_apps/{file_name}/lib/main.dart'
+        # base_dir = f'generate_apps/{appname}/dartpad_main.dart'
+
+        print('call is hereeee11')
+        
+        # if not os.path.exists(base_dir):
+        #     print(f"Error: File not found at {base_dir}")
+        #     return None
+
+        # Read the content of the Dart file
+        # with open(base_dir, 'r') as file:
+        #     dart_code = file.read()
+
+        # with open('dartpadcodecreation.txt', 'r') as file:
+        #         prompt_body = file.read()
+        
+        # with open('chatbot_system_message.txt', 'r') as file:
+        #         chatbot_system_message = file.read()
+
+        # Combine the user inputs (requirements_text) with the prompt body
+        # dartpad_prompt = f"""
+
+        # {prompt_body}
+        # {dart_code}
+        # """
+
+        # if not dartpad_prompt:
+        #         logger.error('Failed to create and send the dart pad prompt')
+        #         return Response({"error": "Invalid chat history provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        #     # Prepare messages for the Azure OpenAI API
+        # messages = [
+        #     {"role": "system", "content": chatbot_system_message},
+        #     {"role": "user", "content": dartpad_prompt}
+        # ]
+
+        # Generate the Flutter app code using Azure OpenAI
+        #app_files = self.call_azure_openapi(messages)
+        #create_flutter_files(app_files, appname, dartpad=True)
+
+        dartpad_dir = f'generate_apps/{appname}/dartpad_main.dart'
+
+        if not os.path.exists(dartpad_dir):
+            print(f"Error: File not found at {dartpad_dir}")
+            return None
+
+        with open(dartpad_dir, 'r') as file:
+            dartpad_main = file.read()
+
+
         # API endpoint for creating a Gist
         url = "https://api.github.com/gists"
         
-        if not os.path.exists(base_dir):
-            print(f"Error: File not found at {base_dir}")
-            return None
-
-        # Read the content of the Dart file
-        with open(base_dir, 'r') as file:
-            dart_code = file.read()
-
-
         # Gist file content in JSON format
         payload = {
             "description": "Dart code uploaded via API",
             "public": True,  # Public Gist
             "files": {
-                f"{file_name}_main.dart": {
-                    "content": dart_code
+                f"{appname}_main.dart": {
+                    "content": dartpad_main
                 }
             }
         }
@@ -148,11 +188,29 @@ class BuildAppAPIView(APIView):
         else:
             print(f"Error: {response.status_code} - {response.json()}")
             return None
-        
 
-    def create_prompt(self, chat_history):
+    def get_extract_rephrased_answer(self, chat_history):
+            confirmed_texts = []
+            rephrasetext = None
+            for item in chat_history:
+                # Check if the item is a dictionary with 'text' and 'sender' keys
+                if isinstance(item, dict) and 'text' in item:
+                    # Check if the text contains "You confirmed"
+                    if "You confirmed" in item['text']:
+                        confirmed_texts.append(item['text'])
+
+            if confirmed_texts:
+                print("Confirmed Texts:")
+                for idx, text in enumerate(confirmed_texts, 1):
+                    rephrasetext = text
+            return rephrasetext
+
+
+# Extract and print texts containing "You confirmed"
+    def create_prompt(self, appname, chat_history):
         """Create a detailed prompt based on user requirements."""
         user_requirements = []
+        rephrasetext = self.get_extract_rephrased_answer(chat_history)
         for entry in chat_history:
             if isinstance(entry, dict):
                 question = entry.get('question')
@@ -161,30 +219,51 @@ class BuildAppAPIView(APIView):
                     user_requirements.append(f"{question}: {answer}")
         if user_requirements:
             requirements_text = '\n'.join(user_requirements)
-            with open('prompt_body.txt', 'r') as file:
+            with open('dartpadcodecreation.txt', 'r') as file:
                 prompt_body = file.read()
 
             # Combine the user inputs (requirements_text) with the prompt body
             complete_prompt = f"""
-            I need your help to generate a complete Flutter mobile app based on the following user inputs:
+            Create a Dart file for a Flutter application with  the name {appname} and that meets the following user requirements and is optimized for smooth performance in DartPad with the following deails:
+            
+            Main intent : 
+            {rephrasetext}
 
+            User Requirements:
             {requirements_text}
 
+            App design principles : 
             {prompt_body}
             """
-            
+            print(f"the complete_prompt prompt {complete_prompt}")
             return complete_prompt
         else:
             logger.warning('Chat history does not contain valid user requirements.')
             return None
     
 
-# Function to parse and write each section to its respective file
+def clean_dart_code(dart_code):
+    """
+    Clean the Dart code extracted from the OpenAI response.
+    
+    :param dart_code: The raw Dart code from OpenAI's response.
+    :return: Cleaned Dart code, without markdown or extra characters.
+    """
+    # Remove triple backticks (```dart or ```) and any surrounding extra spaces or newlines
+    dart_code = re.sub(r'```dart|```', '', dart_code).strip()
 
-
+    # Ensure the code starts with 'import' or 'void main()' (basic Dart code check)
+    if not dart_code.startswith('import') and 'void main()' not in dart_code:
+        raise ValueError("The extracted code doesn't appear to be valid Dart code.")
+    
+    return dart_code
 # Function to parse and write main.dart and pubspec.yaml files
-def create_flutter_files(response, appname):
-    base_dir = f'generate_apps/{appname}/lib'
+def create_flutter_files(response, appname, dartpad=False):
+    if not dartpad:
+        base_dir = f'generate_apps/{appname}/lib'
+    else:
+        base_dir = f'generate_apps/{appname}/'
+
     
     # Ensure base directory exists for main.dart
     os.makedirs(base_dir, exist_ok=True)
@@ -197,26 +276,41 @@ def create_flutter_files(response, appname):
         sections = response.split('```dart')  # Separate based on code block with dart
     else:
         sections = response.split('```')  # Separate based on generic code block
+    
+    print(f"the sections is {sections}")
 
 
     # Extract main.dart content
-    if len(sections) >= 2:
-        main_dart_content = sections[1].strip().rstrip('```').strip()  # Extract content between code block markers
+    # if len(sections) >= 2:
+    #     main_dart_content = sections[1].strip().rstrip('```').strip()  # Extract content between code block markers
 
-    # Ensure required content is found
-    if not main_dart_content:
-        print("Required content for main.dart not found in the response.")
+    # # Ensure required content is found
+    # if not main_dart_content:
+    #     print("Required content for main.dart not found in the response.")
+    #     return
+
+    try:
+        main_dart_content = clean_dart_code(response)
+        print(f"the main code is {main_dart_content}")
+    except ValueError as ve:
+        print(f"Validation error: {ve}")
         return
-
+    
+    
     # Write main.dart content to file
-    main_dart_path = os.path.join(base_dir, 'main.dart')
+    if not dartpad:
+        file_name = "main.dart"
+    else:
+        file_name = "dartpad_main.dart"
+    main_dart_path = os.path.join(base_dir, file_name)
     with open(main_dart_path, 'w') as file:
         file.write(main_dart_content)
-    print(f"main.dart file created at {main_dart_path}")
+    print(f"{file_name}.dart file created at {main_dart_path}")
 
     # Validate and clean the Dart file
     validate_dart_file(main_dart_path)
-    generate_pubspec_yaml(appname)
+    if not dartpad:
+        generate_pubspec_yaml(appname)
     
 
 def generate_pubspec_yaml(appname):
@@ -347,10 +441,10 @@ class RephraseAPIView(APIView):
 
         # Rephrase the user input
         try:
-            prompt = f"Create a well-structured prompt to help design an app based on the following idea: '{user_input}'. Please rephrase it to be more suitable for a common man to understand what you think of his requirement and how you are going to design the solution it should include the screens you might give, what kind of actions can be done on the app and what are the features of the app that you can use it for"
+            prompt = f"Create a well-structured prompt to help design an app based on the following idea: {user_input}. Please rephrase it to be more suitable for a common man to understand what you think of his requirement and how you are going to design the solution it should include the screens you might give, what kind of actions can be done on the app and what are the features of the app that you can use it for. Your response should only start with 'I want to create...'"
 
             messages = [
-                {"role": "system", "content": "You are an AI assistant who helps people to ideate and better rephrase their app ideas, which can be send to open ai to create the backend for the mobile app that the user wants to create. Your response will start as : So you mean - "},
+                {"role": "system", "content": "You are an AI assistant who helps people to ideate and better rephrase their app ideas, which can be send to open ai to create the backend for the mobile app that the user wants to create. Your response will start directly with the content and nothing else, no preamble no start up statements etc, response should start with 'I want to create...' "},
                 {"role": "user", "content": prompt}
             ]
             
