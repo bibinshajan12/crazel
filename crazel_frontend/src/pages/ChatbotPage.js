@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import './ChatbotPage.css';
 import followUpQuestions from './questions'; // Importing the questions from the new file
 import axios from 'axios'; // Importing axios to send the data to the backend
+import config from './config';
+
+const apiUrl = `${config.apiBaseUrl}`;
+console.log('the called urls is ', apiUrl)
 
 const ChatbotPage = () => {
     const [messages, setMessages] = useState([]);
@@ -12,7 +16,7 @@ const ChatbotPage = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [userLevel, setUserLevel] = useState(''); // To store if the user is beginner or experienced
-    const [showUserLevelModal, setShowUserLevelModal] = useState(false); // Control showing the modal
+    const [showUserLevelModal, setShowUserLevelModal] = useState(false); // Control showing the modal           
     const [filteredQuestions, setFilteredQuestions] = useState([]); // Filtered questions for beginners
     const [finalized, setFinalized] = useState(false); // To track if the questions are finalized
     const [showInitialPopup, setShowInitialPopup] = useState(true); // Show initial popup
@@ -96,7 +100,8 @@ const ChatbotPage = () => {
 
                 try {
                     // Send the message to backend for rephrasing
-                    const response = await axios.post('/api/chatbot/rephrase/', { text: inputValue });
+                    const response = await axios.post(`/api/chatbot/rephrase/`, { text: inputValue });
+                    console.log('the backed is ', `${apiUrl}/api/chatbot/rephrase/`)
 
                     if (response.status === 200 && response.data.rephrased_text) {
                         const rephrasedText = response.data.rephrased_text;
@@ -191,7 +196,7 @@ const ChatbotPage = () => {
 
             try {
                 // Retrigger the backend API to get another alternative rephrase
-                const response = await axios.post('/api/chatbot/rephrase/', { text: initialQuery });
+                const response = await axios.post(`/api/chatbot/rephrase/`, { text: inputValue });
 
                 setIsLoading(false); // Hide loading widget
 

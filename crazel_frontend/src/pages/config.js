@@ -1,5 +1,5 @@
 const config = {
-    apiBaseUrl: 'http://localhost:8000/api',
+    apiBaseUrl: process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000',
     // Add other configuration settings if needed
 };
 

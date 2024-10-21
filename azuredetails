@@ -1,7 +1,9 @@
+az acr login --name crazelacr  
+
 az container show --resource-group crazel-app --name crazelwebapp --query ipAddress.fqdn
 
-docker build --platform linux/amd64 -t my-crazel-app .
+docker build --platform linux/amd64 -t crazel-web .
 &&
-docker tag my-crazel-app crazelacr.azurecr.io/crazelwebapp/crazel-frontend
+docker tag crazel-web crazelacr.azurecr.io/crazelwebapp/crazel-web
 &&
-docker push crazelacr.azurecr.io/crazelwebapp/crazel-frontend
+docker push crazelacr.azurecr.io/crazelwebapp/crazel-web

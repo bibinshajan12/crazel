@@ -16,5 +16,7 @@ COPY . .
 # Expose the port Django will run on
 EXPOSE 8000
 
-# Run migrations and start the Django development server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# Run makemigrations, migrate, and start the Django development server
+# CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 127.0.0.1:8000"]
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn crazel_backend.wsgi:application --bind 0.0.0.0:8000"]
+
