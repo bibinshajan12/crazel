@@ -11,6 +11,7 @@ import TemplatesPage from './pages/TemplatesPage';
 import SigninPage from './pages/SignInPage';
 import './App.css';
 import AppPreview from './pages/AppPreview';
+import FlutterPreview from './pages/FlutterPreview';
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -40,6 +41,7 @@ function App() {
               <Route path="/home" element={<HomePage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/app-preview" element={<AppPreview />} />
+              <Route path="/flutter-preview" element={<FlutterPreview />} />
               <Route path="/features" element={<FeaturesPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/templates" element={<TemplatesPage />} /> 

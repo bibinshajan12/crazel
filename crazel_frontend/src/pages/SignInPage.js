@@ -6,14 +6,40 @@ import './SignInPage.css'; // Custom CSS for the Sign-In page
 
 const SignInPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate(); // useNavigate hook for navigation
 
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
   };
 
-  const navigateToChatbot = () => {
-    navigate('/chat'); // Redirect to ChatbotPage on "Try for Free"
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (isSignUp && password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    const url = isSignUp ? '/api/register/' : '/api/login/'; // Change API endpoint based on action
+    const body = JSON.stringify({ email, password });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      navigate('/home'); // Redirect to home page or wherever you want after successful registration/login
+    } else {
+      alert(data.message || "Something went wrong");
+    }
   };
 
   // Initialize Particle Animation
@@ -48,23 +74,32 @@ const SignInPage = () => {
       {/* Sign In or Sign Up form */}
       <div className="sign-in-container">
         <h1>{isSignUp ? 'Create Account' : 'Sign In'}</h1>
-        <form>
-          <input type="email" placeholder="Email" required />
-          <input type="password" placeholder="Password" required />
+        <form onSubmit={handleFormSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           {isSignUp && (
             <input
               type="password"
               placeholder="Confirm Password"
               required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           )}
           <button type="submit">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
         </form>
-        
-        {/* Try for Free Button */}
-        <button className="try-for-free-button" onClick={navigateToChatbot}>
-          Try for Free
-        </button>
         
         {/* Toggle between Sign In and Sign Up */}
         <span className="toggle" onClick={toggleSignUp}>

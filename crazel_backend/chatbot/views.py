@@ -27,30 +27,45 @@ subscription_key = os.getenv("AZURE_OPENAI_API_KEY", "REPLACE_WITH_YOUR_KEY_VALU
 github_token = os.getenv("GITHUB_TOKEN", "REPLACE_WITH_YOUR_GITHUB_TOKEN")
 
 
+
+
 # Configure OpenAI
 openai.api_type = "azure"
 openai.api_key = subscription_key
 openai.api_base = endpoint
 openai.api_version = "2024-05-01-preview"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")  # Correct Azure API base
+openai.api_type = "azure"
+openai.api_version = "2024-10-01-preview"
 
 class BuildAppAPIView(APIView):
 
     def call_azure_openapi(self, messages):
         """Call Azure OpenAI API to generate the app code."""
         try:
-            response = openai.ChatCompletion.create(
-                engine=deployment,
+            openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")  # Ensure this is set correctly
+            openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")  # Set your Azure endpoint
+            openai.api_type = "azure"
+            openai.api_version = "2024-10-01-preview"
+
+
+            # Make the OpenAI API call using chat_completions
+            response = openai.chat.completions.create(
+                model=os.getenv("AZURE_OPENAI_DEPLOYMENT_ID"),  # Chat model deployed in Azure
                 messages=messages,
                 max_tokens=4000,
-                temperature=0.7,
-                top_p=0.95,
-                frequency_penalty=0,
-                presence_penalty=0
+                temperature=0.7
             )
-            return response['choices'][0]['message']['content'].strip()
+
+            # Extract the response text
+            data_received = response.choices[0].message.content
+            return response.choices[0].message.content
+
+
         except Exception as e:
-            logger.error(f"Failed to call Azure OpenAI API: {e}")
-            raise
+            print(f"Error in OpenAI API call: {e}")
+            raise e
 
     def post(self, request):
         chat_history = request.data.get('chatHistory')
@@ -419,19 +434,28 @@ class RephraseAPIView(APIView):
     def call_azure_openapi(self, messages):
         """Call Azure OpenAI API to generate the app code."""
         try:
-            response = openai.ChatCompletion.create(
-                engine=deployment,
+            openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")  # Ensure this is set correctly
+            openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")  # Set your Azure endpoint
+            openai.api_type = "azure"
+            openai.api_version = "2024-10-01-preview"
+
+
+            # Make the OpenAI API call using chat_completions
+            response = openai.chat.completions.create(
+                model=os.getenv("AZURE_OPENAI_DEPLOYMENT_ID"),  # Chat model deployed in Azure
                 messages=messages,
-                max_tokens=800,
-                temperature=0.7,
-                top_p=0.95,
-                frequency_penalty=0,
-                presence_penalty=0
+                max_tokens=4000,
+                temperature=0.7
             )
-            return response['choices'][0]['message']['content'].strip()
+
+            # Extract the response text
+            data_received = response.choices[0].message.content
+            return response.choices[0].message.content
+
+
         except Exception as e:
-            logger.error(f"Failed to call Azure OpenAI API: {e}")
-            raise
+            print(f"Error in OpenAI API call: {e}")
+            raise e
 
     def post(self, request):
         user_input = request.data.get('text', '')

@@ -1,0 +1,5 @@
+openai==1.52.2
+Flask
+python-dotenv
+aiohttp
+Flask-CORS

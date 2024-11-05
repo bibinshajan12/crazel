@@ -86,20 +86,6 @@
     text-shadow: 2px 4px 8px rgba(0, 170, 255, 0.6); /* Stylish shadow effect */
 }
 
-/* Textarea Styling for Suggestions */
-.suggestion-box textarea {
-    width: 100%;
-    height: 150px;
-    padding: 10px;
-    background-color: #463f3f; /* Slightly darker background */
-    color: #f0f0f0; /* Light text */
-    border: 1px solid #333; /* Subtle border */
-    border-radius: 8px;
-    font-size: 16px;
-    resize: none;
-    outline: none;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-}
 
 /* Button Styling for Submission */
 .suggestion-box button {
@@ -201,3 +187,47 @@
     margin-top: 15px;
     text-align: center;
 }
+.suggestion-box {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #474545;
+    border-radius: 10px;
+  }
+  
+  .suggestion-box textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #413838;
+    font-size: 16px;
+    resize: none; /* Prevent resizing */
+    z-index: 10; /* Ensure the textarea is not overlapped by other elements */
+  }
+  
+  .suggestion-box button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .suggestion-box button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .suggestion-box h3 {
+    margin-bottom: 10px;
+  }
+  
+  .llm-suggestions {
+    margin-top: 20px;
+    background-color: #e0e0e0;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  

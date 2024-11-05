@@ -3,6 +3,8 @@ import './ChatbotPage.css';
 import followUpQuestions from './questions'; // Importing the questions from the new file
 import axios from 'axios'; // Importing axios to send the data to the backend
 import config from './config';
+import { useNavigate } from 'react-router-dom';
+
 
 const apiUrl = `${config.apiBaseUrl}`;
 console.log('the called urls is ', apiUrl)
@@ -23,6 +25,7 @@ const ChatbotPage = () => {
     const [appName, setAppName] = useState(''); // Store the name of the app
     const [showAppNamePrompt, setShowAppNamePrompt] = useState(false); // Control showing the app name prompt
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [showFlutterSuccessPopup, setShowFlutterSuccessPopup] = useState(false);
     const [showRetryPopup, setShowRetryPopup] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [gist_url, setGistUrl] = useState(''); // Store the gist URL for app preview
@@ -30,7 +33,12 @@ const ChatbotPage = () => {
     const [showRephraseOptions, setShowRephraseOptions] = useState(false); // Control when to show rephrase options
     const [isEditing, setIsEditing] = useState(false); // For editing rephrased message
     const [editedRephrasedMessage, setEditedRephrasedMessage] = useState(''); // Store edited rephrased message
+    const [webUrl, setWebUrl] = useState(''); // Initialize state for web_url
     const editableInputRef = useRef(null);
+    const navigate = useNavigate(); // Initialize navigate
+    const apiUrl = 'http://localhost:5000';  // Set the Flask backend URL
+
+
 
     // Load chat data from localStorage when the component is mounted
     useEffect(() => {
@@ -337,6 +345,53 @@ const ChatbotPage = () => {
         setFinalized(true); // Set the finalized state to true
     };
 
+    const handleCreateFlutterProject = async () => {
+        setIsLoading(true);
+    
+        try {
+            const chatHistory = messages.map((msg) => msg.text);
+    
+            // Send the appName and chatHistory to the backend to generate the Flutter project
+            const response = await axios.post(`${apiUrl}/generate_flutter_web`, { appName, chatHistory });
+            console.log("response data", response.data)
+            if (response.status === 200) {
+                // Extract web_url from response.data
+                const { web_url } = response.data;
+                setWebUrl(web_url); // Store the URL in state
+                console.log("web_url data", web_url.data)
+
+    
+                // Update the chat with a success message
+                setMessages(prevMessages => [
+                    ...prevMessages,
+                    { text: 'Success! Your app is now ready for review.', sender: 'bot' }
+                ]);
+    
+                setShowFlutterSuccessPopup(true);
+    
+                // Navigate to the Flutter preview page with the app name and web_url
+                navigate(`/flutter-preview?appname=${appName}&projecturl=${encodeURIComponent(web_url)}`);
+            } else {
+                throw new Error("Backend error occurred");
+            }
+        } catch (error) {
+            console.error('Error creating Flutter project:', error);
+    
+            // Display an error message to the user in the chat
+            setMessages(prevMessages => [
+                ...prevMessages,
+                { text: 'There was an error creating your Flutter project. Please try again.', sender: 'bot' }
+            ]);
+    
+            setShowRetryPopup(true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    
+    
+
     const handleFinalizeAndBuild = async () => {
         setIsLoading(true);
     
@@ -359,9 +414,11 @@ const ChatbotPage = () => {
         ];
     
         try {
-            const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });
-            const { gist_url } = response.data;
-            setGistUrl(gist_url);
+            // const response = await axios.post('/api/chatbot/build/', { chatHistory, appName });
+            const response = await axios.post(`${apiUrl}/generate_flutter_web`, { appName, chatHistory });
+            const { web_url } = response.data;
+            setWebUrl(web_url); // Store the URL in state
+            console.log("web_url data", web_url.data)
     
             if (response.status === 200) {
                 setMessages(prevMessages => [
@@ -535,6 +592,9 @@ const ChatbotPage = () => {
                         <button className="finalize-button" onClick={handleFinalizeAndBuild}>
                             Finalize and Build
                         </button>
+                        {/* <button className="flutter-project-button" onClick={handleCreateFlutterProject}>
+                            Create Flutter Project
+                        </button> */}
                         <button className="retake-button" onClick={handleRetake} >
                             Retake
                         </button>
@@ -598,7 +658,7 @@ const ChatbotPage = () => {
                     <div className="popup-content">
                         <p>Success! Your app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
                         <button
-                            onClick={() => window.location.href = `/app-preview?appname=${appName}&gisturl=${encodeURIComponent(gist_url)}`}
+                            onClick={() => window.location.href = `/flutter-preview?appname=${appName}&projecturl=${encodeURIComponent(webUrl)}`}
 
                         >
                             View
@@ -607,6 +667,22 @@ const ChatbotPage = () => {
                     </div>
                 </div>
             )}
+            {showFlutterSuccessPopup && (
+            <div className="success-popup">
+                <div className="popup-content">
+                    <p>Success! Your Flutter app is now ready for review. Press the "VIEW" button to get a real-time preview.</p>
+                    <button
+                        onClick={() => window.location.href = `/flutter-preview?appname=${appName}&projecturl=${encodeURIComponent(webUrl)}`}
+                    >
+                        View Flutter App
+                    </button>
+                    <button onClick={() => setShowFlutterSuccessPopup(false)}>Close</button>
+                </div>
+            </div>
+)}
+
+
+
 
             {/* Retry Popup */}
             {showRetryPopup && (

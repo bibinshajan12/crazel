@@ -7,3 +7,6 @@ docker build --platform linux/amd64 -t crazel-web .
 docker tag crazel-web crazelacr.azurecr.io/crazelwebapp/crazel-web
 &&
 docker push crazelacr.azurecr.io/crazelwebapp/crazel-web
+
+
+az storage account list --resource-group crazel-app --query "[].name"

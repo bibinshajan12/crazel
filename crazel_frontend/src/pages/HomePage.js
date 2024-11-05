@@ -108,6 +108,9 @@ const HomePage = () => {
       <ButtonContainer>
         <TileButton to="/chat">Start Building Your App</TileButton>
         <TileButton to="/features">Explore Features</TileButton>
+        <TileButton to="/flutter-preview?appname=snakeandladderdemo&projecturl=%2Fsnakeandladderdemo%2Fweb%2F">
+          Sample App for preview
+        </TileButton>
       </ButtonContainer>
       <Footer>
         <motion.p

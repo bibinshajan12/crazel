@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/chatbot/', include('chatbot.urls')), 
     path('api/apppreview/', include('app_preview.urls')),  
+    path('api/flutterbuild/', include('flutterbuild.urls')),  
 
 
 ]

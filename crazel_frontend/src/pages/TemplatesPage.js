@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaMobileAlt, FaShoppingCart, FaUserTie, FaHeartbeat } from 'react-icons/fa'; // Import icons
+import { Link } from 'react-router-dom';
+
 
 const TemplatesContainer = styled.div`
   display: flex;
@@ -80,20 +82,24 @@ const TemplatesPage = () => {
       <TemplateGrid>
         <TemplateCard>
           <Icon><FaMobileAlt /></Icon>
-          <TemplateTitle>Mobile Business App</TemplateTitle>
+          <TemplateTitle>Snake and Ladder</TemplateTitle>
           <TemplateDescription>
-            A complete business app to manage your services, appointments, and clients. Perfect for entrepreneurs.
+          An engaging board game adventure developed by Crazel, where strategy and luck collide! Perfect for game enthusiasts of all ages
           </TemplateDescription>
-          <TemplateButton href="#">Preview Template</TemplateButton>
+          <TemplateButton as={Link} to="/flutter-preview?appname=snakeandladderdemo&projecturl=%2Fsnakeandladderdemo%2Fweb%2F">
+            Snake and Ladder Game
+          </TemplateButton>
         </TemplateCard>
 
         <TemplateCard>
           <Icon><FaShoppingCart /></Icon>
-          <TemplateTitle>E-Commerce App</TemplateTitle>
+          <TemplateTitle>Gesture Control</TemplateTitle>
           <TemplateDescription>
-            Set up your online store with features like product listings, shopping carts, and secure payments.
+            A simple gesture control app
           </TemplateDescription>
-          <TemplateButton href="#">Preview Template</TemplateButton>
+          <TemplateButton as={Link} to="/flutter-preview?appname=gesture&projecturl=%gesture%2Fweb%2F">
+          Gesture Control
+        </TemplateButton>
         </TemplateCard>
 
         <TemplateCard>
