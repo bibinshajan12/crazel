@@ -1,70 +1,168 @@
-# Getting Started with Create React App
+# Crazel
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Crazel is an AI-driven no-code/low-code platform that enables users to design, generate, preview, and deploy full-fledged mobile applications through natural language conversations.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **🤖 AI-Powered Chatbot**: Interact with an intelligent AI assistant to describe your app requirements in plain English
+- **📱 Flutter App Generation**: Automatically generates complete Flutter mobile applications based on your specifications
+- **👁️ Real-time Preview**: Preview your generated apps in the browser before deployment
+- **⚡ Fast Deployment**: Build and deploy apps quickly with streamlined deployment tools
+- **🎨 Beautiful UI/UX**: Generate apps with modern, responsive designs that work across all devices
+- **🔐 Authentication**: Built-in user authentication and session management
+- **📦 Template Library**: Access to pre-built app templates to jumpstart your development
 
-### `npm start`
+## 🏗️ Architecture
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Crazel is built with a microservices architecture:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend** (`crazel_frontend/`): React-based web application
+- **Backend** (`crazel_backend/`): Django REST API server
+- **LLM Service** (`crazel_llm/`): AI/LLM model service for code generation
+- **Flutter Service** (`flutter_service/`): Flutter build and compilation service
+- **Flutter Backend** (`crazel_flutter/`): DartPad backend for Flutter web compilation
 
-### `npm test`
+## 📋 Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Docker and Docker Compose
+- Python 3.8+ (for local development)
+- Node.js 14+ (for local development)
+- Flutter SDK (for local development)
 
-### `npm run build`
+## 🛠️ Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Using Docker (Recommended)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
+```bash
+git clone https://github.com/bibinshajan12/crazel.git
+cd crazel
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. Create `.env` files for each service (see Configuration section)
 
-### `npm run eject`
+3. Build and run with Docker Compose:
+```bash
+docker-compose up --build
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The application will be available at:
+- Frontend: http://localhost:80
+- Backend API: http://localhost:8000
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Local Development
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+#### Backend Setup
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+cd crazel_backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
 
-## Learn More
+#### Frontend Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+cd crazel_frontend
+npm install
+npm start
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## ⚙️ Configuration
 
-### Code Splitting
+Create `.env` files in the following directories with your configuration:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- `crazel_backend/.env`
+- `flutter_service/.env`
+- `crazel_frontend/.env`
 
-### Analyzing the Bundle Size
+Required environment variables (examples):
+```env
+# Azure OpenAI Configuration
+AZURE_OPENAI_API_KEY=your_api_key
+AZURE_OPENAI_ENDPOINT=your_endpoint
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Django Configuration
+DJANGO_SECRET_KEY=your_secret_key
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
-### Making a Progressive Web App
+# Database Configuration
+DATABASE_URL=sqlite:///db.sqlite3
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📁 Project Structure
 
-### Advanced Configuration
+```
+crazel-web-app/
+├── crazel_backend/          # Django backend application
+│   ├── authentication/      # User authentication module
+│   ├── chatbot/            # Chatbot and AI integration
+│   ├── flutterbuild/       # Flutter build management
+│   └── app_preview/        # App preview functionality
+├── crazel_frontend/        # React frontend application
+│   ├── src/
+│   │   ├── components/     # Reusable React components
+│   │   └── pages/          # Application pages
+├── crazel_llm/            # LLM/AI service
+├── flutter_service/       # Flutter build service
+├── crazel_flutter/        # DartPad backend service
+└── docker-compose.yml     # Docker orchestration
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🎯 Usage
 
-### Deployment
+1. **Start a Conversation**: Navigate to the chatbot interface and describe your app idea
+2. **Refine Requirements**: Work with the AI to clarify and refine your app specifications
+3. **Generate Code**: The platform generates Flutter code based on your requirements
+4. **Preview**: Preview your app in the browser using the built-in preview feature
+5. **Deploy**: Build and deploy your app to mobile platforms
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🧪 Development
 
-### `npm run build` fails to minify
+### Running Tests
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+# Backend tests
+cd crazel_backend
+python manage.py test
+
+# Frontend tests
+cd crazel_frontend
+npm test
+```
+
+### Code Style
+
+- Backend: Follow PEP 8 Python style guide
+- Frontend: Follow ESLint configuration
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 🔗 Links
+
+- Repository: https://github.com/bibinshajan12/crazel
+- Documentation: (Add documentation link if available)
+
+## 👥 Authors
+
+- **Bibin Shajan** - [GitHub](https://github.com/bibinshajan12)
+
+## 🙏 Acknowledgments
+
+- Flutter team for the amazing framework
+- OpenAI/Azure OpenAI for AI capabilities
+- Django and React communities
+
+---
+
+**Note**: Make sure to keep your `.env` files secure and never commit them to version control. The `.gitignore` file is configured to exclude sensitive files.
